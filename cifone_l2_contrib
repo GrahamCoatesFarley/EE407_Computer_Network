@@ -12,7 +12,7 @@
   UdpEchoClientHelper echoClient (csmaInterfaces.GetAddress (nCsma), 9); // Instantiates a udp echo client helper class object with (to send packets) the
                                                                          // base Ipv4 address and mask of the last Csma interfaces and port 9
   echoClient.SetAttribute ("MaxPackets", UintegerValue (1));            // Sets the clients MaxPackets to unsigned integer value 1
-  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));      // Sets the clients Interval to 1 second
-  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));         // Sets the clients PakcetSize to unsigned integer value 1024
+  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));      // Sets the clients Interval for packets to 1 second
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));         // Sets the clients PacketSize to unsigned integer value 1024
 
 //------------------------------------------------------------------------------------------------------------------------------------------------------101
