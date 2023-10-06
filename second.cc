@@ -104,18 +104,16 @@ main (int argc, char *argv[])		// Start of the main function of the project
   echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));	// Sets the clients Interval to 1 second
   echoClient.SetAttribute ("PacketSize", UintegerValue (1024));		// Sets the clients PakcetSize to unsigned integer value 1024
 
-  ApplicationContainer clientApps = echoClient.Install (p2pNodes.Get (0)); // Instantiates a client application container class object 
-									   // and giving it the echo client with the 1st p2p node installed
+  ApplicationContainer clientApps = echoClient.Install (p2pNodes.Get (0)); // Creates a client application class object and sets it equal to the echo client 1st p2p node installed
   clientApps.Start (Seconds (2.0));	// Sets the client application start time to 2 seconds
   clientApps.Stop (Seconds (10.0));	// Sets the client application stop time to 10 seconds
 
-  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();	// Instantiates an Ipv4 Global Routing Helper class object and builds
-							// a routing database, initializes routing tables of the nodes for the simulation
+  Ipv4GlobalRoutingHelper::PopulateRoutingTables ();	// This creates a routing table to facilitate communication between the different routing paths
 
-  pointToPoint.EnablePcapAll ("second");		 // Enables pcap output of p2p helper objects to indicated file name
-  csma.EnablePcap ("second", csmaDevices.Get (1), true); // Enables pcap output for the 2nd (Index starts at 0) csma helper object 
+  pointToPoint.EnablePcapAll ("second");		 // Enables pcap tracing of p2p helper object
+  csma.EnablePcap ("second", csmaDevices.Get (1), true); // Enables pcap tracing for the csma helper object 
 
   Simulator::Run ();		// Runs the simulation
-  Simulator::Destroy ();	// Ends and destroys(recycles) the simulation
-  return 0;	// Ambiguous return value to indicate successful execution of the project/program
+  Simulator::Destroy ();	// Ends the simulation
+  return 0;	//  Return value to indicate successful execution of the project/program
 }
