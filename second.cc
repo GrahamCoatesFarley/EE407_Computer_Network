@@ -83,13 +83,13 @@ main (int argc, char *argv[])		// Start of the main function of the project
   stack.Install (csmaNodes);		// Installs ALL of the csmaNodes to the stack object
 
   Ipv4AddressHelper address;				// Instantiates an Ipv4 address helper class object address
-  address.SetBase ("10.1.1.0", "255.255.255.0");	// Sets the base IP address and mask 
-  Ipv4InterfaceContainer p2pInterfaces;			// Instatiates an Ipv4 interface container class object for p2p interfaces
-  p2pInterfaces = address.Assign (p2pDevices);		// Assigns the set address to the p2p interfaces
+  address.SetBase ("10.1.1.0", "255.255.255.0");	// Sets the base IP address to 10.1.1.0 and mask 
+  Ipv4InterfaceContainer p2pInterfaces;			// Instatiates an Ipv4 interface container class object that sill be used for p2pdevice
+  p2pInterfaces = address.Assign (p2pDevices);		// Assigns the set IP address to the p2p devices interfaces
 
-  address.SetBase ("10.1.2.0", "255.255.255.0");	// Sets a new base IP address and mask
+  address.SetBase ("10.1.2.0", "255.255.255.0");	// create and set antoher base IP address to 10.1.2.0 and mask
   Ipv4InterfaceContainer csmaInterfaces;		// Instantiates an Ipv4 interface container class object for csma interfaces
-  csmaInterfaces = address.Assign (csmaDevices);	// Assigns the set address to the csma interfaces
+  csmaInterfaces = address.Assign (csmaDevices);	// Assigns the set IP address to the csma interfaces
 
   // Setup of the Server on the CSMA device:
   UdpEchoServerHelper echoServer (9);                   // Instantiates a Udp echo server helper class object with port #9 for the server
