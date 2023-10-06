@@ -91,18 +91,19 @@ main (int argc, char *argv[])		// Start of the main function of the project
   Ipv4InterfaceContainer csmaInterfaces;		// Instantiates an Ipv4 interface container class object for csma interfaces
   csmaInterfaces = address.Assign (csmaDevices);	// Assigns the set address to the csma interfaces
 
-  UdpEchoServerHelper echoServer (9);			// Instantiates a Udp echo server helper class object with port # 9
+ // Setup of the Server on the CSMA device:
+  UdpEchoServerHelper echoServer (9);                   // Instantiates a Udp echo server helper class object with port #9 for the server
 
-  ApplicationContainer serverApps = echoServer.Install (csmaNodes.Get (nCsma)); // Instantiates a server application container and 
-										// gives the the echoServer with each csma node installed
-  serverApps.Start (Seconds (1.0));	// Sets the server application start time to 1 second
-  serverApps.Stop (Seconds (10.0));	// Sets the server application stop time to 10 seconds
+  ApplicationContainer serverApps = echoServer.Install (csmaNodes.Get (nCsma)); // Instantiates a container for the echoServer with the last csma device node
+  serverApps.Start (Seconds (1.0));     // Sets the server application start time to 1 second
+  serverApps.Stop (Seconds (10.0));     // Sets the server application stop time to 10 seconds
 
-  UdpEchoClientHelper echoClient (csmaInterfaces.GetAddress (nCsma), 9); // Instantiates a udp echo client helper class object with the
-									 // base Ipv4 address and mask of the Csma interfaces and port 9
-  echoClient.SetAttribute ("MaxPackets", UintegerValue (1));		// Sets the clients MaxPackets to unsigned integer value 1
-  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));	// Sets the clients Interval to 1 second
-  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));		// Sets the clients PakcetSize to unsigned integer value 1024
+  // Setup of the Client Application:
+  UdpEchoClientHelper echoClient (csmaInterfaces.GetAddress (nCsma), 9); // Instantiates a udp echo client helper class object with (to send packets) the
+                                                                         // base Ipv4 address and mask of the last Csma interfaces and port 9
+  echoClient.SetAttribute ("MaxPackets", UintegerValue (1));            // Sets the clients MaxPackets to unsigned integer value 1
+  echoClient.SetAttribute ("Interval", TimeValue (Seconds (1.0)));      // Sets the clients Interval for packets to 1 second
+  echoClient.SetAttribute ("PacketSize", UintegerValue (1024));         // Sets the clients PacketSize to unsigned integer value 1024
 
   ApplicationContainer clientApps = echoClient.Install (p2pNodes.Get (0)); // Creates a client application class object and sets it equal to the echo client 1st p2p node installed
   clientApps.Start (Seconds (2.0));	// Sets the client application start time to 2 seconds
