@@ -43,9 +43,9 @@ main (int argc, char *argv[])		// Start of the main function of the project
   uint32_t nCsma = 3;	// Unsigned 32-bit integer value to indicate the number of CSMA devices
 
   CommandLine cmd;	// Command line object instantiation
-  cmd.AddValue ("nCsma", "Number of \"extra\" CSMA nodes/devices", nCsma); 	// adds 3 Csma program arguments, with descriptive t ext indicating they are extra CSMA devices 
-  cmd.AddValue ("verbose", "Tell echo applications to log if true", verbose);   // adds an argument with boolean value as the callback called verbose
-
+  cmd.AddValue ("nCsma", "Number of \"extra\" CSMA nodes/devices", nCsma); 	// adds a check for a Csma argument, adds helper text to display to the user, assigns the value found to the variable nCsma
+  cmd.AddValue ("verbose", "Tell echo applications to log if true", verbose);   // adds a check for a verbose argument, adds helper text to display to the user, assigns the value found to variable verbose
+	
   cmd.Parse (argc,argv);  // parses program arguments, from the input command-line and will attempt to handle them all
 
   if (verbose)	// If verbose is TRUE
