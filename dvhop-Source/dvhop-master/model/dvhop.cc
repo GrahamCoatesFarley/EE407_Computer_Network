@@ -345,7 +345,7 @@ namespace ns3 {
 
 
     void
-    RoutingProtocol::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
+    RoutingProtocol::PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit) const 
     {
       *stream->GetStream () << "(" << m_ipv4->GetObject<Node>()->GetId() << " - Not implemented yet";
     }
@@ -357,14 +357,6 @@ namespace ns3 {
       *stream->GetStream ()<<"----------------- Node "<<node->GetId ()<<"-----------------"<<"\n";
       m_disTable.Print (stream);
     }
-
-
-
-
-
-
-
-
 
     int64_t
     RoutingProtocol::AssignStreams (int64_t stream)
