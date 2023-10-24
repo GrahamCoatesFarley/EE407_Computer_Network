@@ -63,15 +63,15 @@ private:
   void CreateBeacons();
 };
 
-int main (int argc, char **argv)
+int main (int argc, char **argv)                          // Main loop invitation 
 {
-  DVHopExample test;
-  if (!test.Configure (argc, argv))
-    NS_FATAL_ERROR ("Configuration failed. Aborted.");
+  DVHopExample test;                                      // Creates DVHop 
+  if (!test.Configure (argc, argv))                       // Triggers in the event test objects configuration fails 
+    NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Delcares error if the trigger condition is met.
 
-  test.Run ();
-  test.Report (std::cout);
-  return 0;
+  test.Run ();                                            // Initiates running sequence of DVhop simulation
+  test.Report (std::cout);                                
+  return 0;                                               // Return successful exicution 
 }
 
 //-----------------------------------------------------------------------------
@@ -123,8 +123,10 @@ DVHopExample::Run ()
   Simulator::Destroy ();
 }
 
+
+// TODO: Report simulation result 
 void
-DVHopExample::Report (std::ostream &)
+DVHopExample::Report (std::ostream &)                            
 {
 }
 
@@ -204,7 +206,7 @@ DVHopExample::InstallInternetStack ()
   stack.SetRoutingHelper (dvhop); // has effect on the next Install ()
   stack.Install (nodes);
   Ipv4AddressHelper address;
-  address.SetBase ("10.0.0.0", "255.0.0.0");
+  address.SetBase ("10.0.0.0", "255.0.0.0");                                                            // Adjust the IP address to the following 
   interfaces = address.Assign (devices);
 
   Ptr<OutputStreamWrapper> distStream = Create<OutputStreamWrapper>("dvhop.distances", std::ios::out);
