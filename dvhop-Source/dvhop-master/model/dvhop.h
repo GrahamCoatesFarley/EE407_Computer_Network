@@ -24,12 +24,12 @@ namespace ns3 {
     class RoutingProtocol : public Ipv4RoutingProtocol{
     public:
       static const uint32_t DVHOP_PORT;
-      static TypeId GetTypeId (void);
+      static TypeId GetTypeId (void);  // Develops a routing protocol ID
 
 
       RoutingProtocol();
-      virtual ~RoutingProtocol();
-      virtual void DoDispose();
+      virtual ~RoutingProtocol();    // Destructor, reallocates dynamically allocated memory from runtime
+      virtual void DoDispose();      // Closes every socket in the node (one per interface)
 
       //From Ipv4RoutingProtocol
       Ptr<Ipv4Route>  RouteOutput(Ptr<Packet> p, const Ipv4Header &header, Ptr<NetDevice> oif, Socket::SocketErrno &sockerr);
@@ -38,24 +38,24 @@ namespace ns3 {
                                   MulticastForwardCallback mfcb,
                                   LocalDeliverCallback     ldcb,
                                   ErrorCallback            errcb);
-      virtual void SetIpv4(Ptr<Ipv4> ipv4);
-      virtual void NotifyInterfaceUp (uint32_t interface);
-      virtual void NotifyInterfaceDown (uint32_t interface);
-      virtual void NotifyAddAddress (uint32_t interface, Ipv4InterfaceAddress address);
-      virtual void NotifyRemoveAddress (uint32_t interface, Ipv4InterfaceAddress address);
-      virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit) const;
+      virtual void SetIpv4(Ptr<Ipv4> ipv4);                                                            // Sets the nodes IP, funtion and schedule
+      virtual void NotifyInterfaceUp (uint32_t interface);                                             // Used to format and install an interface on a socket
+      virtual void NotifyInterfaceDown (uint32_t interface);                                           // Used to remove the interface
+      virtual void NotifyAddAddress (uint32_t interface, Ipv4InterfaceAddress address);                // Assigns an IP address to allow for broadcast recieval
+      virtual void NotifyRemoveAddress (uint32_t interface, Ipv4InterfaceAddress address);             // Removes bound IP addresses
+      virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit) const;         // Prints node ID to the stream with formatting
 
       int64_t AssignStreams(int64_t stream);
 
       //Getters and Setters for protocol parameters
-      void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }
-      void SetPosition(double x, double y) { m_xPosition = x; m_yPosition = y; }
+      void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }                       // Sets the nnode to be a beacon
+      void SetPosition(double x, double y) { m_xPosition = x; m_yPosition = y; }          // Sets the nodes location on the 2D axis
 
-      double GetXPosition()               { return m_xPosition;}
-      double GetYPosition()               { return m_yPosition;}
-      bool  IsBeacon()                   { return m_isBeacon;}
+      double GetXPosition()               { return m_xPosition;}                          // Gets the nodes X coordinate
+      double GetYPosition()               { return m_yPosition;}                          // Gets the nodes Y coordinate
+      bool  IsBeacon()                   { return m_isBeacon;}                            // Determines in the node is flagged as a beacon (knows its location)
 
-      void  PrintDistances(Ptr<OutputStreamWrapper> stream, Ptr<Node> node) const;
+      void  PrintDistances(Ptr<OutputStreamWrapper> stream, Ptr<Node> node) const;        // Prints the node ID,Beacon andress and Info from the Distance Table
 
     private:
       //Start protocol operation
