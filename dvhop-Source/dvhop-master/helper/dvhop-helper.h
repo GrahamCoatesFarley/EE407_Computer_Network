@@ -1,4 +1,31 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+
+	Outline of Methods defined within:
+
+	Forward Declarationa:
+		class Node			-- a network Node object class, 
+					provides NetDevice objects for network interfacing between other Nodes connected by Channel Instances
+					provides Application objects to represent userspace traffic that interact with Nodes through Socket API
+					any Node created is added to the NodeList automatically
+		class Ipv4RoutingHelper		-- used to create Ipv4 routing protocol objects
+
+	PDMs
+		void Print( node, stream )	-- Print function which retrieves an Ipv4 object object as a node, the routing protocol from the DVHop class
+					printd ID's of a the node to the output stream
+		ObjectFactory m_agentFactory	-- a subclass of the ns3::Object, can hold set attributes to set automatically during object construction 
+
+	PUBLIC METHODS:
+		DVHopHelper		-- Default Constructor to instantiate the class object
+					utilizes the Ipv4RoutingHelper to set the PDM m_agentFactory type id
+		Copy			-- copy constructor to instantiate deep copy of DVHopHelper, referenced by pointer
+		Create			-- creates and returns pointer to a new routing protocol from the current agentFactory pdm
+		Set			-- sets the name and attribute value of the agentFactory pdm
+		AssignStreams		-- installs Ipv4 and routing to nodes add new streams to current DVHop stream
+		PrintDistanceTableAllAt -- prints the distance table and times
+
+
+*/
 #ifndef DVHOP_HELPER_H
 #define DVHOP_HELPER_H
 
@@ -11,7 +38,7 @@
 
 namespace ns3 {
 
-  //Forward declarations
+  //Forward declarations -- indicate needed classes for the class to work properly; a Node
   class Node;
   class Ipv4RoutingProtocol;
 
@@ -49,7 +76,7 @@ namespace ns3 {
   private:
     void Print (Ptr<Node> node, Ptr<OutputStreamWrapper> stream) const;
 
-    /*The factory to create DVHope Routing object*/
+    /*The factory to create DVHop Routing object*/
     ObjectFactory m_agentFactory;
   };
 
