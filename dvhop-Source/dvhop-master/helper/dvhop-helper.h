@@ -11,7 +11,7 @@
 		class Ipv4RoutingHelper		-- used to create Ipv4 routing protocol objects
 
 	PDMs
-		void Print( node, stream )	-- Print function which retrieves an Ipv4 object object as a node, the routing protocol from the DVHop class
+		void Print( node, stream )	-- Print function which retrieves an Ipv4 class object as a node, the routing protocol from the DVHop class
 					printd ID's of a the node to the output stream
 		ObjectFactory m_agentFactory	-- a subclass of the ns3::Object, can hold set attributes to set automatically during object construction 
 
