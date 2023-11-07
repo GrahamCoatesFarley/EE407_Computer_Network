@@ -38,21 +38,26 @@ namespace ns3 {
                                   MulticastForwardCallback mfcb,
                                   LocalDeliverCallback     ldcb,
                                   ErrorCallback            errcb);
-      virtual void SetIpv4(Ptr<Ipv4> ipv4);                                                            // Sets the nodes IP, funtion and schedule
+      // Sets the nodes IP, function and schedule
+      virtual void SetIpv4(Ptr<Ipv4> ipv4);                                                           
+      // Interface Formating and  Installation for Node Sockets
       virtual void NotifyInterfaceUp (uint32_t interface);                                             // Used to format and install an interface on a socket
       virtual void NotifyInterfaceDown (uint32_t interface);                                           // Used to remove the interface
+      // IP Address assignment for broadcast recieval
       virtual void NotifyAddAddress (uint32_t interface, Ipv4InterfaceAddress address);                // Assigns an IP address to allow for broadcast recieval
       virtual void NotifyRemoveAddress (uint32_t interface, Ipv4InterfaceAddress address);             // Removes bound IP addresses
       virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit) const;         // Prints node ID to the stream with formatting
-
+      // Assigns a random value to the stream
       int64_t AssignStreams(int64_t stream);
 
-      //Getters and Setters for protocol parameters
-      void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }                       // Sets the nnode to be a beacon
-      void SetPosition(double x, double y) { m_xPosition = x; m_yPosition = y; }          // Sets the nodes location on the 2D axis
-
-      double GetXPosition()               { return m_xPosition;}                          // Gets the nodes X coordinate
-      double GetYPosition()               { return m_yPosition;}                          // Gets the nodes Y coordinate
+      //Sets if node is a Beacon
+      void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }            
+      // Sets coordinate location of a node
+      void SetPosition(double x, double y) { m_xPosition = x; m_yPosition = y; }         
+      // Gets node coordinates
+      double GetXPosition()               { return m_xPosition;}                        
+      double GetYPosition()               { return m_yPosition;}                       
+      // Predicates on if a node is a beacon
       bool  IsBeacon()                   { return m_isBeacon;}                            // Determines in the node is flagged as a beacon (knows its location)
 
       void  PrintDistances(Ptr<OutputStreamWrapper> stream, Ptr<Node> node) const;        // Prints the node ID,Beacon andress and Info from the Distance Table
