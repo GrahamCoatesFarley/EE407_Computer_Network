@@ -12,7 +12,7 @@ namespace ns3
     {
     }
 
-    // Returns the number of hops to get to known beacon
+    // Returns the number of hops to get to the passed beacon
     uint16_t
     DistanceTable::GetHopsTo (Ipv4Address beacon) const
     {
@@ -25,7 +25,7 @@ namespace ns3
       else return 0;
     }
 
-    // Returns the position of the know beacon
+    // Returns the position of the passed beacon
     Position
     DistanceTable::GetBeaconPosition (Ipv4Address beacon) const
     {
@@ -38,7 +38,7 @@ namespace ns3
       else return Position(-1.0,-1.0);
     }
 
-    // Adds a new Beacon to the data table
+    // Adds a new Beacon to the data table, assigning its BeaconInfo
     void
     DistanceTable::AddBeacon (Ipv4Address beacon, uint16_t hops, double xPos, double yPos)
     {
@@ -61,7 +61,7 @@ namespace ns3
         }
     }
 
-    // Returns the time at which the beacon information was
+    // Returns the time at which the passed beacon information was
     // last updated
     Time
     DistanceTable::LastUpdatedAt (Ipv4Address beacon) const
