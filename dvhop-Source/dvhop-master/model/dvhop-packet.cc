@@ -100,7 +100,7 @@ namespace ns3
     FloodingHeader::Print (std::ostream &os) const  
     {
       //                  "Reference" Node            Current Hop Count          X                  Y
-      os << "Beacon: " << m_beaconId << " ,hopCount: " << m_hopCount << ", (" << m_xPos << ", "<< m_yPos<< ")\n";
+      os << "\nBeacon: " << m_beaconId << " ,hopCount: " << m_hopCount << ", (" << m_xPos << ", "<< m_yPos<< ")\n";
 
     }
 
