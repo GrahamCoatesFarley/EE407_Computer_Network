@@ -44,16 +44,21 @@ namespace ns3 {
   {
     int64_t currentStream = stream;
       Ptr<Node> node;
+    // For each Node in the simulation
       for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
         {
           node = (*i);
+          // Get associated IP
           Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
           NS_ASSERT_MSG (ipv4, "Ipv4 not installed on node");
+          // Get associated routing (dvhop)
           Ptr<Ipv4RoutingProtocol> proto = ipv4->GetRoutingProtocol ();
           NS_ASSERT_MSG (proto, "Ipv4 routing not installed on node");
           Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
+      
           if (dvhop)
             {
+              // Add to current stream
               currentStream += dvhop->AssignStreams (currentStream);
               continue;
             }
