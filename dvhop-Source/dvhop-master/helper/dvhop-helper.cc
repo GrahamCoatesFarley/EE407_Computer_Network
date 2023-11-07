@@ -45,7 +45,8 @@ namespace ns3 {
   {
     int64_t currentStream = stream;
       Ptr<Node> node;
-    // For each Node in the simulation
+    // For each Node in the simulation, get the routing protocol of the IP address
+    // and add the routing protocol stream to the current communication stream
       for (NodeContainer::Iterator i = c.Begin (); i != c.End (); ++i)
         {
           node = (*i);
