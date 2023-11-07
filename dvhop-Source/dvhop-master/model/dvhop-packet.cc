@@ -22,7 +22,7 @@ namespace ns3
       m_seqNo    = seqNo;      
       // Set the current hop count
       m_hopCount = hopCount;   
-      // Sets the ID of the beacon (node ofo reference)
+      // Sets the ID of the beacon (node of reference)
       m_beaconId = beacon;     
     }
 
