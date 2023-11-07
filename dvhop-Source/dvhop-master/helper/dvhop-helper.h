@@ -39,7 +39,7 @@
 namespace ns3 {
 
   //Forward declarations -- indicate needed classes for the class to work properly
-  class Node;	// Node object
+  class Node;			// Node object
   class Ipv4RoutingProtocol;	// IP Protocol
 
 
