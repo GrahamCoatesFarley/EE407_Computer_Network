@@ -15,11 +15,15 @@ namespace ns3
 
     FloodingHeader::FloodingHeader(double xPos, double yPos, uint16_t seqNo, uint16_t hopCount, Ipv4Address beacon)
     {
-      m_xPos     = xPos;        // Assigns the X coordinate of the current node
-      m_yPos     = yPos;        // Assigns the Y coordinate of the current node
-      m_seqNo    = seqNo;       // Sets the current sequence number
-      m_hopCount = hopCount;    // Sets the current hop count value
-      m_beaconId = beacon;      // Sets the IP address of the beacon from which the hops are being counted to
+      // Set (X,Y) Coordinate of Node
+      m_xPos     = xPos;        
+      m_yPos     = yPos;      
+      // Set sequence Number of Packet
+      m_seqNo    = seqNo;      
+      // Set the current hop count
+      m_hopCount = hopCount;   
+      // Sets the ID of the beacon (node ofo reference)
+      m_beaconId = beacon;     
     }
 
     TypeId
