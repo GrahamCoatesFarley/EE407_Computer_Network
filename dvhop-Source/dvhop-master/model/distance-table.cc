@@ -8,10 +8,11 @@ namespace ns3
   {
 
 
-    DistanceTable::DistanceTable()
+    DistanceTable::DistanceTable()		// Default Constructor
     {
     }
 
+    // Returns the number of hops to get to known beacon
     uint16_t
     DistanceTable::GetHopsTo (Ipv4Address beacon) const
     {
@@ -24,6 +25,7 @@ namespace ns3
       else return 0;
     }
 
+    // Returns the position of the know beacon
     Position
     DistanceTable::GetBeaconPosition (Ipv4Address beacon) const
     {
@@ -36,7 +38,7 @@ namespace ns3
       else return Position(-1.0,-1.0);
     }
 
-
+    // Adds a new Beacon to the data table
     void
     DistanceTable::AddBeacon (Ipv4Address beacon, uint16_t hops, double xPos, double yPos)
     {
@@ -59,7 +61,8 @@ namespace ns3
         }
     }
 
-
+    // Returns the time at which the beacon information was
+    // last updated
     Time
     DistanceTable::LastUpdatedAt (Ipv4Address beacon) const
     {
@@ -72,6 +75,7 @@ namespace ns3
       else return Time::Max ();
     }
 
+    // Creates a linked list (as a stack) of each node for access
     std::vector<Ipv4Address>
     DistanceTable::GetKnownBeacons() const
     {
@@ -83,6 +87,7 @@ namespace ns3
       return theBeacons;
     }
 
+    // Prints the beacon Address and Information to the output stream
     void
     DistanceTable::Print (Ptr<OutputStreamWrapper> os) const
     {
@@ -94,11 +99,12 @@ namespace ns3
         }
     }
 
-
+    // Overload of the extraction operator to print the known beacon information
     std::ostream &
     operator<< (std::ostream &os, BeaconInfo const &h)
     {
       std::pair<float,float>  pos = h.GetPosition ();
+      //				X		     Y		Record Timestamp
       os << h.GetHops () << "\t(" << pos.first << ","<< pos.second << ")\t"<< h.GetTime ()<<"\n";
       return os;
     }
