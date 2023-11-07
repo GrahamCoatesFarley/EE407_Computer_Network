@@ -15,20 +15,23 @@ namespace ns3
 
     typedef std::pair<double, double> Position;
 
+    // Class object to locally store beacon information
     class BeaconInfo
     {
     public:
-      uint16_t  GetHops()     const   { return m_hops;     }
+      uint16_t  GetHops()     const   { return m_hops;     }  
       Position  GetPosition() const   { return m_pos;      }
       Time      GetTime()     const   { return m_updatedAt;}
-
       void SetHops    (uint16_t hops) { m_hops = hops;  }
       void SetPosition(Position p)    { m_pos  = p;     }
       void SetTime    ( Time t )      { m_updatedAt = t;}
 
     private:
+    // # of hops to beacon
       uint16_t m_hops;
+    // The beacons coordinates (as a pair)
       Position m_pos;
+    // Time of data storage
       Time     m_updatedAt;
     };
 
