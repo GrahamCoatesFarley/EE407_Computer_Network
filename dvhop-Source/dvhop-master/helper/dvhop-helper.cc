@@ -56,7 +56,6 @@ namespace ns3 {
           Ptr<Ipv4RoutingProtocol> proto = ipv4->GetRoutingProtocol ();
           NS_ASSERT_MSG (proto, "Ipv4 routing not installed on node");
           Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
-      
           if (dvhop)
             {
               // Add to current stream
