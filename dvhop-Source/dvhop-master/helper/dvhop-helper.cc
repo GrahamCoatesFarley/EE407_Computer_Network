@@ -72,23 +72,25 @@ namespace ns3 {
   void
   DVHopHelper::PrintDistanceTableAllAt(Time printTime, Ptr<OutputStreamWrapper> stream) const
   {
+    // Print out distance table entry for each node
     for(uint32_t i=0; i < NodeList::GetNNodes (); i++)
       {
         Ptr<Node> node = NodeList::GetNode (i);
+        // Schedule to print after <printTime> delay
         Simulator::Schedule(printTime, &DVHopHelper::Print, this, node, stream);
       }
-
   }
-
+  // Method to print Node
   void
   DVHopHelper::Print (Ptr<Node> node, Ptr<OutputStreamWrapper> stream) const
   {
+    // Retrieve node object by IP
     Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
     Ptr<dvhop::RoutingProtocol> rp = DynamicCast<dvhop::RoutingProtocol>(ipv4->GetRoutingProtocol ());
     //Ptr<Ipv4RoutingProtocol> rp = ipv4->GetRoutingProtocol ();
     NS_ASSERT (rp);
+    // Print node information to output stream
     rp->PrintDistances(stream, node);
   }
-
 }
 
