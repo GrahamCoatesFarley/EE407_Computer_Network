@@ -26,8 +26,10 @@ namespace ns3 {
   Ptr<Ipv4RoutingProtocol>
   DVHopHelper::Create (Ptr<Node> node) const
   {
-    Ptr<dvhop::RoutingProtocol> agent = m_agentFactory.Create<dvhop::RoutingProtocol> ();
-    node->AggregateObject (agent);
+    // Creates a pointer for the dvhop RoutingProtocol
+    Ptr<dvhop::RoutingProtocol> agent = m_agentFactory.Create<dvhop::RoutingProtocol> ();  
+    // Connects via pointer of node object the node and routing protocols
+    node->AggregateObject (agent);    
     return agent;
   }
 
