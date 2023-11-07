@@ -38,9 +38,9 @@
 
 namespace ns3 {
 
-  //Forward declarations -- indicate needed classes for the class to work properly; a Node
-  class Node;
-  class Ipv4RoutingProtocol;
+  //Forward declarations -- indicate needed classes for the class to work properly
+  class Node;	// Node object
+  class Ipv4RoutingProtocol;	// IP Protocol
 
 
   class DVHopHelper : public Ipv4RoutingHelper
