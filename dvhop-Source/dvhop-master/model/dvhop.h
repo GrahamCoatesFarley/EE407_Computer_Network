@@ -63,10 +63,14 @@ namespace ns3 {
       void  PrintDistances(Ptr<OutputStreamWrapper> stream, Ptr<Node> node) const;        // Prints the node ID,Beacon andress and Info from the Distance Table
 
     private:
-      //Start protocol operation
+      //Start protocol operation (timer initialization)
       void        Start    ();
+      // Sends a packet to a Socket at IP address
       void        SendTo   (Ptr<Socket> socket, Ptr<Packet> packet, Ipv4Address destination);
+      // Interacts with Recieved packets, 
+      // updating hop count and beacon address from packet header
       void        RecvDvhop(Ptr<Socket> socket);
+      // Finds socket based on Interface IP
       Ptr<Socket> FindSocketWithInterfaceAddress (Ipv4InterfaceAddress iface) const;
       //In case there exists a route to the destination, the packet is forwarded
       bool        Forwarding(Ptr<const Packet> p, const Ipv4Header &header, UnicastForwardCallback ufcb, ErrorCallback errcb);
