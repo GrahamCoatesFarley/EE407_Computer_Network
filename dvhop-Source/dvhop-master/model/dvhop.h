@@ -60,8 +60,8 @@ namespace ns3 {
       // Predicates on if a node is a beacon
       bool  IsBeacon()                   { return m_isBeacon;}                            // Determines in the node is flagged as a beacon (knows its location)
 
-      void  PrintDistances(Ptr<OutputStreamWrapper> stream, Ptr<Node> node) const;        // Prints the node ID,Beacon andress and Info from the Distance Table
-
+      // Prints the node ID,Beacon andress and Info from the Distance Table
+      void  PrintDistances(Ptr<OutputStreamWrapper> stream, Ptr<Node> node) const;        
     private:
       //Start protocol operation (timer initialization)
       void        Start    ();
