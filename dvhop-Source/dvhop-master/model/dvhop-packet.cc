@@ -95,16 +95,20 @@ namespace ns3
       return dist;
     }
 
+    // Prints the the Beacons IP address and the hopcount and coordinates
     void
-    FloodingHeader::Print (std::ostream &os) const  // Prints the the Beacons IP address and the hopcount and coordinates
+    FloodingHeader::Print (std::ostream &os) const  
     {
+      //                  "Reference" Node            Current Hop Count          X                  Y
       os << "Beacon: " << m_beaconId << " ,hopCount: " << m_hopCount << ", (" << m_xPos << ", "<< m_yPos<< ")\n";
 
     }
 
+    // Overloads the output stream extraction operator to call the defined Print function
     std::ostream &
-    operator<< (std::ostream &os, FloodingHeader const &h)  // Overrides the output stream extraction operator to call the defined Print function
+    operator<< (std::ostream &os, FloodingHeader const &h)  
     {
+      // Print the packet header
       h.Print (os);
       return os;
     }
