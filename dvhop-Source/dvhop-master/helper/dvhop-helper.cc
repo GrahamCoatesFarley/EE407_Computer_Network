@@ -39,6 +39,7 @@ namespace ns3 {
     m_agentFactory.Set (name, value);
   }
 
+  // Installs Ipv4 and routing to nodes and adds new streams to current DVHop stream
   int64_t
   DVHopHelper::AssignStreams (NodeContainer c, int64_t stream)
   {
