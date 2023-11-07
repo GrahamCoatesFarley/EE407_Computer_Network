@@ -9,21 +9,21 @@ namespace ns3
 
     NS_OBJECT_ENSURE_REGISTERED (FloodingHeader);
 
-    FloodingHeader::FloodingHeader()
+    FloodingHeader::FloodingHeader()  // Default Constructor
     {
     }
 
     FloodingHeader::FloodingHeader(double xPos, double yPos, uint16_t seqNo, uint16_t hopCount, Ipv4Address beacon)
     {
-      m_xPos     = xPos;
-      m_yPos     = yPos;
-      m_seqNo    = seqNo;
-      m_hopCount = hopCount;
-      m_beaconId = beacon;
+      m_xPos     = xPos;        // Assigns the X coordinate of the current node
+      m_yPos     = yPos;        // Assigns the Y coordinate of the current node
+      m_seqNo    = seqNo;       // Sets the current sequence number
+      m_hopCount = hopCount;    // Sets the current hop count value
+      m_beaconId = beacon;      // Sets the IP address of the beacon from which the hops are being counted to
     }
 
     TypeId
-    FloodingHeader::GetTypeId ()
+    FloodingHeader::GetTypeId ()      // Sets the interface ID for the packet
     {
       static TypeId tid = TypeId("ns3::dvhop::FloodingHeader")
           .SetParent<Header> ()
@@ -32,7 +32,7 @@ namespace ns3
     }
 
     TypeId
-    FloodingHeader::GetInstanceTypeId () const
+    FloodingHeader::GetInstanceTypeId () const  // Gets the interfaces ID
     {
       return GetTypeId ();
     }
@@ -44,7 +44,7 @@ namespace ns3
     }
 
     void
-    FloodingHeader::Serialize (Buffer::Iterator start) const
+    FloodingHeader::Serialize (Buffer::Iterator start) const  // Converts the coordinates of the node into its integral byte representation
     {
       //The position info are serialized as uint64_t, though they're doubles
       //We convert the double to a unsigned long and then serialize that number
@@ -59,13 +59,13 @@ namespace ns3
       std::copy(p2, p2+sizeof(uint64_t), reinterpret_cast<char*>(&dst));
       start.WriteHtonU64 (dst);
 
-      start.WriteU16 (m_seqNo);
-      start.WriteU16 (m_hopCount);
+      start.WriteU16 (m_seqNo);      
+      start.WriteU16 (m_hopCount);  
       WriteTo(start, m_beaconId);
     }
 
     uint32_t
-    FloodingHeader::Deserialize (Buffer::Iterator start)
+    FloodingHeader::Deserialize (Buffer::Iterator start)    // Returns byte representation of thecoordinates, sequence number and hop count to double values
     {
       Buffer::Iterator i = start;
 
@@ -85,21 +85,21 @@ namespace ns3
       m_hopCount = i.ReadU16 ();
       ReadFrom (i, m_beaconId);
 
-      //Validate the readed bytes match the serialized size
+      //Validate the read bytes match the serialized size
       uint32_t dist = i.GetDistanceFrom (start);
       NS_ASSERT (dist == GetSerializedSize () );
       return dist;
     }
 
     void
-    FloodingHeader::Print (std::ostream &os) const
+    FloodingHeader::Print (std::ostream &os) const  // Prints the the Beacons IP address and the hopcount and coordinates
     {
       os << "Beacon: " << m_beaconId << " ,hopCount: " << m_hopCount << ", (" << m_xPos << ", "<< m_yPos<< ")\n";
 
     }
 
     std::ostream &
-    operator<< (std::ostream &os, FloodingHeader const &h)
+    operator<< (std::ostream &os, FloodingHeader const &h)  // Overrides the output stream extraction operator to call the defined Print function
     {
       h.Print (os);
       return os;
