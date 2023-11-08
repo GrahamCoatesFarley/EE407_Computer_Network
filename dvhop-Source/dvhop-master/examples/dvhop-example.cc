@@ -148,8 +148,8 @@ DVHopExample::CreateNodes ()
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                  "MinX", DoubleValue (0.0),        // Minimum Coordinate Grid Positions  (0.0,0.0)
                                  "MinY", DoubleValue (0.0),
-                                 "DeltaX", DoubleValue (step),      // Delta (change in) Coordinate Grid Positions (step, step)
-                                 "DeltaY", DoubleValue (step),
+                                 "DeltaX", DoubleValue (step),      // Delta (change in) Coordinate Grid Positions (step, 0)
+                                 "DeltaY", DoubleValue (0),
                                  "GridWidth", UintegerValue (size),
                                  "LayoutType", StringValue ("RowFirst"));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
