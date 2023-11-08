@@ -71,16 +71,16 @@ int main (int argc, char **argv)                          // Main loop invitatio
 
   test.Run ();                                            // Initiates running sequence of DVhop simulation
   test.Report (std::cout);                                
-  return 0;                                               // Return successful exicution 
+  return 0;                                               // Return successful execution 
 }
 
 //-----------------------------------------------------------------------------
 DVHopExample::DVHopExample () :
-  size (10),
-  step (100),
-  totalTime (10),
-  pcap (true),
-  printRoutes (true)
+  size (10),              // Sets number of nodes
+  step (100),             // Set step size between nodes
+  totalTime (10),         // Sets simulation run time
+  pcap (true),            // Enables pcap generation  
+  printRoutes (true)      // Enables route printing
 {
 }
 
@@ -107,20 +107,20 @@ void
 DVHopExample::Run ()
 {
 //  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", UintegerValue (1)); // enable rts cts all the time.
-  CreateNodes ();
-  CreateDevices ();
-  InstallInternetStack ();
+  CreateNodes ();                  // Creates nodes for simulation
+  CreateDevices ();                // Installs devices on Nodes
+  InstallInternetStack ();         // Establishes Internet topoglogy
 
-  CreateBeacons();
+  CreateBeacons();                  // Converts a number of nodes to beacons
 
   std::cout << "Starting simulation for " << totalTime << " s ...\n";
 
-  Simulator::Stop (Seconds (totalTime));
+  Simulator::Stop (Seconds (totalTime));      // Establishes the Stop time for the simulation
+  
+  AnimationInterface anim("animation.xml");   // Establishes the file for animation generation of simulation    
 
-  AnimationInterface anim("animation.xml");
-
-  Simulator::Run ();
-  Simulator::Destroy ();
+  Simulator::Run ();        // Runs the sim
+  Simulator::Destroy ();    // Recycles simulation resources post execution
 }
 
 
@@ -146,10 +146,10 @@ DVHopExample::CreateNodes ()
   // Create static grid
   MobilityHelper mobility;
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
-                                 "MinX", DoubleValue (0.0),
+                                 "MinX", DoubleValue (0.0),        // Minimum Coordinate Grid Positions  (0.0,0.0)
                                  "MinY", DoubleValue (0.0),
-                                 "DeltaX", DoubleValue (step),
-                                 "DeltaY", DoubleValue (0),
+                                 "DeltaX", DoubleValue (step),      // Delta (change in) Coordinate Grid Positions (step, step)
+                                 "DeltaY", DoubleValue (step),
                                  "GridWidth", UintegerValue (size),
                                  "LayoutType", StringValue ("RowFirst"));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -159,6 +159,10 @@ DVHopExample::CreateNodes ()
 void
 DVHopExample::CreateBeacons ()
 {
+  // This is Currently hardcoded to create beacons, can use rand() between 0 and maxNode 
+  // a number of times, maybe 10-15% of the max nodes as beacons?
+
+  
   Ptr<Ipv4RoutingProtocol> proto = nodes.Get (0)->GetObject<Ipv4>()->GetRoutingProtocol ();
   Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
   dvhop->SetIsBeacon (true);
