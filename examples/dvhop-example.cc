@@ -1,4 +1,19 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
+/*
+    Header Documentation:
+    Adapted DV-Hop example to simulate DV-hop on NS3.30.1
+
+    Contributors:
+      Graham Coates-Farely    -- Team Lead
+      Mikaila Flavell
+      Ahmad Suleiman
+      Peter Russell
+      Vincent Cifone
+      Jashitha Boyapati
+      Bhavani Bandi
+
+
+*/
 
 #include "ns3/dvhop-module.h"
 #include "ns3/core-module.h"
