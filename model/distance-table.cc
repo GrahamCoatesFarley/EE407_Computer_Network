@@ -56,8 +56,8 @@ namespace ns3
           info.SetHops (hops);
           info.SetPosition (Position(xPos, yPos));
           info.SetTime (Simulator::Now ());
-	  //m_table[beacon] = info;
-          m_table.insert (std::pair<Ipv4Address, BeaconInfo>(beacon&, info));
+	  m_table[beacon] = info;
+          //m_table.insert (std::pair<Ipv4Address, BeaconInfo>(beacon&, info));
         }
     }
 
