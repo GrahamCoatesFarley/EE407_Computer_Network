@@ -53,6 +53,8 @@ private:
   //\{
   /// Number of nodes
   uint32_t size;
+  /// Number of beacons
+  uint32_t sizeB;
   /// Distance between nodes, meters
   double step;
   /// Simulation time, seconds
@@ -66,6 +68,7 @@ private:
   ///\name network
   //\{
   NodeContainer nodes;
+  NodeContainer beacons;
   NetDeviceContainer devices;
   Ipv4InterfaceContainer interfaces;
   //\}
@@ -91,7 +94,8 @@ int main (int argc, char **argv)                          // Main loop invitatio
 
 //-----------------------------------------------------------------------------
 DVHopExample::DVHopExample () :
-  size (10),              // Sets number of nodes
+  size (10),              			// Sets number of nodes
+  sizeB ((uint32_t)((float)size / 0.3f)),	// Sets number of beacons w/repsect to node count
   step (10),             // Set step size between nodes
   totalTime (10),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
@@ -111,6 +115,7 @@ DVHopExample::Configure (int argc, char **argv)
   cmd.AddValue ("pcap", "Write PCAP traces.", pcap);
   cmd.AddValue ("printRoutes", "Print routing table dumps.", printRoutes);
   cmd.AddValue ("size", "Number of nodes.", size);
+  cmd.AddValue ("sizeB", "Number of beacons." , sizeB);
   cmd.AddValue ("time", "Simulation time, s.", totalTime);
   cmd.AddValue ("step", "Grid step, m", step);
 
@@ -149,7 +154,7 @@ void
 DVHopExample::CreateNodes ()
 {
   std::cout << "Creating " << (unsigned)size << " nodes " << step << " m apart.\n";
-  nodes.Create (size);
+  nodes.Create (size + sizeB);	// Create all nodes + beacons
   // Name nodes
   for (uint32_t i = 0; i < size; ++i)
     {
@@ -163,8 +168,8 @@ DVHopExample::CreateNodes ()
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                  "MinX", DoubleValue (0.0),        // Minimum Coordinate Grid Positions  (0.0,0.0)
                                  "MinY", DoubleValue (0.0),
-                                 "DeltaX", DoubleValue (step),      // Delta (change in) Coordinate Grid Positions (step, 0)
-                                 "DeltaY", DoubleValue (0),
+                                 "DeltaX", DoubleValue (step /3),      // Delta (change in) Coordinate Grid Positions (step, 0)
+                                 "DeltaY", DoubleValue (step /2),
                                  "GridWidth", UintegerValue (size),
                                  "LayoutType", StringValue ("RowFirst"));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -177,11 +182,13 @@ DVHopExample::CreateBeacons ()
   // This is Currently hardcoded to create beacons, can use rand() between 0 and maxNode 
   // a number of times, maybe 10-15% of the max nodes as beacons?
 
+  //for(uint32_t i = size; i < (size +sizeB); i++)
   
-  Ptr<Ipv4RoutingProtocol> proto = nodes.Get (0)->GetObject<Ipv4>()->GetRoutingProtocol ();
-  Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
-  dvhop->SetIsBeacon (true);
-  dvhop->SetPosition (123.42, 4534.452);
+    	Ptr<Ipv4RoutingProtocol> proto = nodes.Get (0)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  	Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
+  	dvhop->SetIsBeacon (true);
+  	//dvhop->SetPosition (123.42, 4534.452);
+  
 
 
   proto = nodes.Get (4)->GetObject<Ipv4>()->GetRoutingProtocol ();
