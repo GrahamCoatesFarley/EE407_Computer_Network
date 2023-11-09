@@ -77,7 +77,7 @@ int main (int argc, char **argv)                          // Main loop invitatio
 //-----------------------------------------------------------------------------
 DVHopExample::DVHopExample () :
   size (10),              // Sets number of nodes
-  step (100),             // Set step size between nodes
+  step (10),             // Set step size between nodes
   totalTime (10),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
   printRoutes (true)      // Enables route printing
