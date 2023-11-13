@@ -80,11 +80,6 @@ private:
   void CreateBeacons();
 };
 
-//----------------------------------------------------------------------------------------------------------------------------------
-// Constants for easze of size/ step adjustment
-const u_int32_t SIZE = 40;
-const uint32_t STEP = 40;
-
 int main (int argc, char **argv)                          // Main loop invitation 
 {
   DVHopExample test;                                      // Creates DVHop 
@@ -98,8 +93,8 @@ int main (int argc, char **argv)                          // Main loop invitatio
 
 //-----------------------------------------------------------------------------
 DVHopExample::DVHopExample () :
-  size (SIZE),              			// Sets number of nodes
-  step (STEP),             // Set step size between nodes
+  size (20),              			// Sets number of nodes
+  step (10),             // Set step size between nodes
   totalTime (10),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
   printRoutes (true)      // Enables route printing
@@ -170,8 +165,8 @@ DVHopExample::CreateNodes ()
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
                                  "MinX", DoubleValue (0.0),        // Minimum Coordinate Grid Positions  (0.0,0.0)
                                  "MinY", DoubleValue (0.0),
-                                 "DeltaX", DoubleValue (step),      // Delta (change in) Coordinate Grid Positions (step, 0)
-                                 "DeltaY", DoubleValue (step),
+                                 "DeltaX", DoubleValue (step /3),      // Delta (change in) Coordinate Grid Positions (step, 0)
+                                 "DeltaY", DoubleValue (step /2),
                                  "GridWidth", UintegerValue (5),
                                  "LayoutType", StringValue ("RowFirst"));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
@@ -186,23 +181,23 @@ DVHopExample::CreateBeacons ()
 
   //for(uint32_t i = size; i < (size +sizeB); i++)
   
-    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (size / 4)->GetObject<Ipv4>()->GetRoutingProtocol ();
+    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (0)->GetObject<Ipv4>()->GetRoutingProtocol ();
   	Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
   	dvhop->SetIsBeacon (true);
-  	dvhop->SetPosition (100, 50);
+  	dvhop->SetPosition (0, 2);
   
 
 
-  proto = nodes.Get (size / 3)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  proto = nodes.Get (4)->GetObject<Ipv4>()->GetRoutingProtocol ();
   dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
   dvhop->SetIsBeacon (true);
-  dvhop->SetPosition (5, 0);
+  dvhop->SetPosition (25, 10);
 
 
-  proto = nodes.Get (size / 2)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  proto = nodes.Get (9)->GetObject<Ipv4>()->GetRoutingProtocol ();
   dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
   dvhop->SetIsBeacon (true);
-  dvhop->SetPosition (150, 25);
+  dvhop->SetPosition (30, 15);
 
 }
 
