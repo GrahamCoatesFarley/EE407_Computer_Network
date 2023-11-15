@@ -3,7 +3,8 @@
     Header Documentation:
     Adapted DV-Hop example to simulate DV-hop on NS3.30.1
 
-    For Ideal
+    For Ideal Conditions Implementation
+
     Contributors:
       Graham Coates-Farely    -- Team Lead
       Mikaila Flavell
