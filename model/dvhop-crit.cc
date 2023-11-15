@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
 
-#include "dvhop.h"
+#include "dvhop-crit.h"
 #include "dvhop-packet.h"
 #include "ns3/log.h"
 #include "ns3/boolean.h"
@@ -15,7 +15,7 @@
 
 
 
-NS_LOG_COMPONENT_DEFINE ("DVHopRoutingProtocol");
+NS_LOG_COMPONENT_DEFINE ("DVHopCritRoutingProtocol");
 
 
 namespace ns3 {
@@ -55,6 +55,9 @@ namespace ns3 {
       m_xPosition(12.56),
       m_yPosition(468.5),
       m_seqNo (0)
+      // m_isAlive(true),                   // Add for killing nodes?
+      //DeathInterval?    -- Could include a later function that changes the interval each time a node dies
+      //DeathInterval (Seconds (1))    // Starts at 1 seconds, updated during Node creation
     {
     }
 
@@ -223,6 +226,11 @@ namespace ns3 {
       m_htimer.SetFunction (&RoutingProtocol::HelloTimerExpire, this);
       m_htimer.Schedule (RoutingProtocol::HelloInterval);
 
+      /*
+      m_dtimer.SetFunction (&RoutingProtocol::DeathTimerExpire, this);
+      m_dtimer.Schedule (RoutingProtocol::DeathInterval);
+      */
+
       m_ipv4 = ipv4;
 
       Simulator::ScheduleNow (&RoutingProtocol::Start, this);
@@ -386,6 +394,18 @@ namespace ns3 {
       m_htimer.Cancel ();
       m_htimer.Schedule (RoutingProtocol::HelloInterval);
     }
+
+    /*
+    void
+    RoutingProtocol::DeathTimerExpire ()
+    {
+      NS_LOG_DEBUG ("Node has died");
+
+
+    }
+    
+    
+    */
 
     bool
     RoutingProtocol::Forwarding(Ptr<const Packet> p, const Ipv4Header &header, Ipv4RoutingProtocol::UnicastForwardCallback ufcb, Ipv4RoutingProtocol::ErrorCallback errcb)

@@ -3,7 +3,8 @@
     Header Documentation:
     Adapted DV-Hop example to simulate DV-hop on NS3.30.1
 
-    For Ideal
+    For Critical Conditons Implementation
+
     Contributors:
       Graham Coates-Farely    -- Team Lead
       Mikaila Flavell
@@ -138,7 +139,7 @@ DVHopExample::Run ()
 
   Simulator::Stop (Seconds (totalTime));      // Establishes the Stop time for the simulation
   
-  AnimationInterface anim("anim_ideal.xml");   // Establishes the file for animation generation of simulation    
+  AnimationInterface anim("anim_critical.xml");   // Establishes the file for animation generation of simulation    
 
   Simulator::Run ();        // Runs the sim
   Simulator::Destroy ();    // Recycles simulation resources post execution
@@ -185,20 +186,20 @@ DVHopExample::CreateBeacons ()
 
   //for(uint32_t i = size; i < (size +sizeB); i++)
   
-    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (0)->GetObject<Ipv4>()->GetRoutingProtocol ();
+    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (size / 4)->GetObject<Ipv4>()->GetRoutingProtocol ();
   	Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
   	dvhop->SetIsBeacon (true);
   	dvhop->SetPosition (100, 50);
   
 
 
-  proto = nodes.Get (4)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  proto = nodes.Get (size / 3)->GetObject<Ipv4>()->GetRoutingProtocol ();
   dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
   dvhop->SetIsBeacon (true);
   dvhop->SetPosition (5, 10);
 
 
-  proto = nodes.Get (9)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  proto = nodes.Get (size / 2)->GetObject<Ipv4>()->GetRoutingProtocol ();
   dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
   dvhop->SetIsBeacon (true);
   dvhop->SetPosition (150, 25);
@@ -223,6 +224,21 @@ DVHopExample::CreateDevices ()
       wifiPhy.EnablePcapAll (std::string ("aodv"));
     }
 }
+
+/*
+void
+DVHopExample::DestroyDevices ()
+{
+  // Method to create time intervals (in ms) to simulate node death
+  // could be part of CreateNodes, assigning each node and time interval that starts getting 
+  // smaller and smaller in increment
+  // i.e. Out of 10 seconds, first node "dies" at 1 second mark, then .75, 0.5625, 0.421875, 0.3164 -> nextDeathTime = prevDeathTime * 0.75
+  // This kind of death might need to be scaled by the number of nodes
+
+
+
+}
+*/
 
 void
 DVHopExample::InstallInternetStack ()
