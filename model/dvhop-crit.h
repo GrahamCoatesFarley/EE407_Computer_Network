@@ -52,6 +52,8 @@ namespace ns3 {
 
       //Sets if node is a Beacon
       void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }     
+      //Sets if node is alive?
+      //void SetIsAlive(bool isAlive)    { m_isAlive = isAlive; }
       // Sets coordinate location of a node
       void SetPosition(double x, double y) { m_xPosition = x; m_yPosition = y; }         
       // Gets node coordinates
@@ -89,6 +91,12 @@ namespace ns3 {
 
       //Boolean to identify if this node acts as a Beacon
       bool m_isBeacon;
+
+      // Possible add for Node death
+      //Time DeathInterval
+      //Timer m_dtimer;
+      //void DeathTimerExpire();
+      //bool m_isAlive;
 
       //This node's position info
       double m_xPosition;
