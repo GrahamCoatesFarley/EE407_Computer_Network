@@ -9,7 +9,7 @@
       Graham Coates-Farely    -- Team Lead
       Mikaila Flavell
       Ahmad Suleiman
-      Peter Russell
+      Russell Peter
       Vincent Cifone
       Jashitha Boyapati
       Bhavani Bandi
