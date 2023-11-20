@@ -1,6 +1,6 @@
 /* -*- Mode:C++; c-file-style:"gnu"; indent-tabs-mode:nil; -*- */
-#ifndef DVHOP_H
-#define DVHOP_H
+#ifndef DVHOP-CRIT_H
+#define DVHOP-CRIT_H
 
 #include "ns3/node.h"
 #include "ns3/random-variable-stream.h"
@@ -12,7 +12,6 @@
 #include "ns3/timer.h"
 #include "ns3/packet.h"
 #include "ns3/ipv4-header.h"
-
 #include "distance-table.h"
 
 #include <map>
@@ -31,6 +30,7 @@ namespace ns3 {
       virtual ~RoutingProtocol();    // Destructor, reallocates dynamically allocated memory from runtime
       virtual void DoDispose();      // Closes every socket in the node (one per interface)
 
+  
       //From Ipv4RoutingProtocol
       Ptr<Ipv4Route>  RouteOutput(Ptr<Packet> p, const Ipv4Header &header, Ptr<NetDevice> oif, Socket::SocketErrno &sockerr);
       bool            RouteInput (Ptr<const Packet> p, const Ipv4Header &header, Ptr<const NetDevice> idev,
@@ -52,8 +52,7 @@ namespace ns3 {
 
       //Sets if node is a Beacon
       void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }     
-      //Sets if node is alive?
-      //void SetIsAlive(bool isAlive)    { m_isAlive = isAlive; }
+    
       // Sets coordinate location of a node
       void SetPosition(double x, double y) { m_xPosition = x; m_yPosition = y; }         
       // Gets node coordinates
@@ -92,11 +91,8 @@ namespace ns3 {
       //Boolean to identify if this node acts as a Beacon
       bool m_isBeacon;
 
-      // Possible add for Node death
-      //Time DeathInterval
-      //Timer m_dtimer;
-      //void DeathTimerExpire();
-      //bool m_isAlive;
+      bool m_isAlive;
+      u_int32_t lifeCount;
 
       //This node's position info
       double m_xPosition;
@@ -109,8 +105,6 @@ namespace ns3 {
 
       uint32_t    m_seqNo;
 
-
-
       //Used to simulate jitter
       Ptr<UniformRandomVariable> m_URandom;
 
@@ -120,5 +114,5 @@ namespace ns3 {
 
 }
 
-#endif /* DVHOP_H */
+#endif /* DVHOP-CRIT_H */
 

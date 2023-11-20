@@ -4,3 +4,6 @@ def build(bld):
     obj = bld.create_ns3_program('dvhop-example', ['wifi', 'internet','dvhop', 'netanim'])
     obj.source = 'dvhop-example.cc'
 
+    obj = bld.create_ns3_program('dvhop-critsim', ['wifi', 'internet','dvhop', 'netanim'])
+    obj.source = 'dvhop-critsim.cc'
+
