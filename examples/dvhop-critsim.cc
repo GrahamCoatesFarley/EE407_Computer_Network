@@ -81,7 +81,7 @@ private:
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------
-// Constants for easze of size/ step adjustment
+// Constants for ease of size/ step adjustment
 const u_int32_t SIZE = 40;
 const uint32_t STEP = 40;
 
@@ -165,6 +165,11 @@ DVHopExample::CreateNodes ()
       std::cout << "Creating node: "<< os.str ()<< std::endl ;
       Names::Add (os.str (), nodes.Get (i));
     }
+
+
+  
+
+
   // Create static grid
   MobilityHelper mobility;
   mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
@@ -225,20 +230,6 @@ DVHopExample::CreateDevices ()
     }
 }
 
-/*
-void
-DVHopExample::DestroyDevices ()
-{
-  // Method to create time intervals (in ms) to simulate node death
-  // could be part of CreateNodes, assigning each node and time interval that starts getting 
-  // smaller and smaller in increment
-  // i.e. Out of 10 seconds, first node "dies" at 1 second mark, then .75, 0.5625, 0.421875, 0.3164 -> nextDeathTime = prevDeathTime * 0.75
-  // This kind of death might need to be scaled by the number of nodes
-
-
-
-}
-*/
 
 void
 DVHopExample::InstallInternetStack ()

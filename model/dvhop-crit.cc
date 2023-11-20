@@ -54,14 +54,11 @@ namespace ns3 {
       m_isBeacon(false),
       m_xPosition(12.56),
       m_yPosition(468.5),
-      m_seqNo (0)
-      // m_isAlive(true),                   // Add for killing nodes?
-      //DeathInterval?    -- Could include a later function that changes the interval each time a node dies
-      //DeathInterval (Seconds (1))    // Starts at 1 seconds, updated during Node creation
-    {
+      m_seqNo (0),
+      m_isAlive (true),
+      m_lifeCount (15)
+     {
     }
-
-
 
     RoutingProtocol::~RoutingProtocol ()
     {
@@ -225,11 +222,6 @@ namespace ns3 {
 
       m_htimer.SetFunction (&RoutingProtocol::HelloTimerExpire, this);
       m_htimer.Schedule (RoutingProtocol::HelloInterval);
-
-      /*
-      m_dtimer.SetFunction (&RoutingProtocol::DeathTimerExpire, this);
-      m_dtimer.Schedule (RoutingProtocol::DeathInterval);
-      */
 
       m_ipv4 = ipv4;
 
@@ -395,17 +387,6 @@ namespace ns3 {
       m_htimer.Schedule (RoutingProtocol::HelloInterval);
     }
 
-    /*
-    void
-    RoutingProtocol::DeathTimerExpire ()
-    {
-      NS_LOG_DEBUG ("Node has died");
-
-
-    }
-    
-    
-    */
 
     bool
     RoutingProtocol::Forwarding(Ptr<const Packet> p, const Ipv4Header &header, Ipv4RoutingProtocol::UnicastForwardCallback ufcb, Ipv4RoutingProtocol::ErrorCallback errcb)
@@ -504,24 +485,26 @@ namespace ns3 {
     void
     RoutingProtocol::RecvDvhop (Ptr<Socket> socket)
     {
-      Address sourceAddress;
-      Ptr<Packet> packet = socket->RecvFrom (sourceAddress); //Read a single packet from 'socket' and retrieve the 'sourceAddress'
+      if(true)
+      {
+        Address sourceAddress;
+        Ptr<Packet> packet = socket->RecvFrom (sourceAddress); //Read a single packet from 'socket' and retrieve the 'sourceAddress'
 
-      InetSocketAddress inetSourceAddr = InetSocketAddress::ConvertFrom (sourceAddress);
-      Ipv4Address sender = inetSourceAddr.GetIpv4 ();
-      Ipv4Address receiver = m_socketAddresses[socket].GetLocal ();
+        InetSocketAddress inetSourceAddr = InetSocketAddress::ConvertFrom (sourceAddress);
+        Ipv4Address sender = inetSourceAddr.GetIpv4 ();
+        Ipv4Address receiver = m_socketAddresses[socket].GetLocal ();
 
-      NS_LOG_DEBUG ("sender:           " << sender);
-      NS_LOG_DEBUG ("receiver:         " << receiver);
-
-
-      FloodingHeader fHeader;
-      packet->RemoveHeader (fHeader);
-      NS_LOG_DEBUG ("Update the entry for: " << fHeader.GetBeaconAddress ());
-      UpdateHopsTo (fHeader.GetBeaconAddress (), fHeader.GetHopCount () + 1, fHeader.GetXPosition (), fHeader.GetYPosition ());
-      std::cout << "Header Dump Post Recieve (Beacon IP/Hop Count/ (X,Y) of Beacon): " << fHeader.GetBeaconAddress() << " / " << fHeader.GetHopCount() << " / ( "  << fHeader.GetXPosition() << " , " << fHeader.GetYPosition() << " ) \n"; 
+        NS_LOG_DEBUG ("sender:           " << sender);
+        NS_LOG_DEBUG ("receiver:         " << receiver);
 
 
+        FloodingHeader fHeader;
+        packet->RemoveHeader (fHeader);
+        NS_LOG_DEBUG ("Update the entry for: " << fHeader.GetBeaconAddress ());
+        UpdateHopsTo (fHeader.GetBeaconAddress (), fHeader.GetHopCount () + 1, fHeader.GetXPosition (), fHeader.GetYPosition ());
+        std::cout << "Header Dump Post Recieve (Beacon IP/Hop Count/ (X,Y) of Beacon): " << fHeader.GetBeaconAddress() << " / " << fHeader.GetHopCount() << " / ( "  << fHeader.GetXPosition() << " , " << fHeader.GetYPosition() << " ) \n"; 
+        std::cout << "\n Life left:" << m_lifeCount << std::endl;
+      }
     }
 
     Ptr<Socket>
@@ -552,10 +535,6 @@ namespace ns3 {
       if( oldHops > newHops || oldHops == 0) //Update only when a shortest path is found
         m_disTable.AddBeacon (beacon, newHops, x, y);
     }
-
-
-
-
   }
 }
 

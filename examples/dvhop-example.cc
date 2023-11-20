@@ -27,6 +27,7 @@
 #include "ns3/netanim-module.h"
 #include <iostream>
 #include <cmath>
+#include "ns3/flow-monitor-helper.h"
 
 using namespace ns3;
 
@@ -63,6 +64,7 @@ private:
   bool pcap;
   /// Print routes if true
   bool printRoutes;
+  std::vector<uint32_t> packetCount;
   //\}
 
   ///\name network
@@ -78,10 +80,11 @@ private:
   void InstallInternetStack ();
   void InstallApplications ();
   void CreateBeacons();
+  void PacketReceived(Ptr<const Packet> packet, uint16_t protocol, const Address & from, const Address &to);
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------
-// Constants for easze of size/ step adjustment
+// Constants for ease of size/ step adjustment
 const u_int32_t SIZE = 40;
 const uint32_t STEP = 40;
 
@@ -102,7 +105,8 @@ DVHopExample::DVHopExample () :
   step (STEP),             // Set step size between nodes
   totalTime (10),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
-  printRoutes (true)      // Enables route printing
+  printRoutes (true),      // Enables route printing
+  packetCount(size, 0)    // Initialize packet count for each node to 0
 {
 }
 
@@ -110,7 +114,7 @@ bool
 DVHopExample::Configure (int argc, char **argv)
 {
   // Enable DVHop logs by default. Comment this if too noisy
-  LogComponentEnable("DVHopRoutingProtocol", LOG_LEVEL_ALL);
+  //LogComponentEnable("DVHopRoutingProtocol", LOG_LEVEL_ALL);
 
   SeedManager::SetSeed (12345);
   CommandLine cmd;
@@ -139,10 +143,13 @@ DVHopExample::Run ()
 
   Simulator::Stop (Seconds (totalTime));      // Establishes the Stop time for the simulation
   
+  
   AnimationInterface anim("anim_ideal.xml");   // Establishes the file for animation generation of simulation    
 
   Simulator::Run ();        // Runs the sim
   Simulator::Destroy ();    // Recycles simulation resources post execution
+
+
 }
 
 
@@ -219,6 +226,10 @@ DVHopExample::CreateDevices ()
   wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue ("OfdmRate6Mbps"), "RtsCtsThreshold", UintegerValue (0));
   devices = wifi.Install (wifiPhy, wifiMac, nodes);
 
+  // Callback function to count received packets
+  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/Enqueue",
+  MakeCallback(&DVHopExample::PacketReceived,this));
+
   if (pcap)
     {
       wifiPhy.EnablePcapAll (std::string ("aodv"));
@@ -244,5 +255,31 @@ DVHopExample::InstallInternetStack ()
     {
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("dvhop.routes", std::ios::out);
       dvhop.PrintRoutingTableAllAt (Seconds (8), routingStream);
+    }
+}
+
+// Packet Count callback function
+void
+DVHopExample:: PacketReceived(Ptr<const Packet> packet, uint16_t protocol, const Address &from, const Address &to)
+{
+    // Find the node index from the device address
+    for (uint32_t i = 0; i < size; ++i)
+    {
+        if (nodes.Get(i)->GetDevice(0)->GetAddress() == from)
+        {
+            packetCount[i]++;
+            std::cout << "Node " << i << " received a packet. Total packets received: " << packetCount[i] << std::endl;
+
+            // Add logic to kill the node if the packet count exceeds a threshold
+            if (packetCount[i] >= 2) // Adjust the threshold as needed
+            {
+                std::cout << "\nNode " << i << " will be killed." << std::endl;
+                // Add logic to simulate node shutdown or take any other action
+                // For example, you can use the following line to simulate node shutdown
+                nodes.Get(i)->GetDevice(0)->SetIfIndex(-1);
+            }
+
+            break;
+        }
     }
 }
