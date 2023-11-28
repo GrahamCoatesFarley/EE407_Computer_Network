@@ -53,6 +53,7 @@ namespace ns3 {
       HelloInterval (Seconds (1)),         //Send HELLO each second
       m_htimer (Timer::CANCEL_ON_DESTROY), //Set timer for HELLO
       m_isBeacon(false),
+      m_isAlive(true),
       m_xPosition(12.56),
       m_yPosition(468.5),
       m_seqNo (0)
@@ -403,7 +404,10 @@ namespace ns3 {
     {
       NS_LOG_DEBUG ("HelloTimer expired");
 
-      SendHello ();
+      if(m_isAlive)
+        SendHello ();
+      else
+        std::cout << "\n\n@" << Simulator::Now() << " , Hello fails.\n\n";
 
       m_htimer.Cancel ();
       m_htimer.Schedule (RoutingProtocol::HelloInterval);
@@ -498,6 +502,7 @@ namespace ns3 {
     RoutingProtocol::SendTo (Ptr<Socket> socket, Ptr<Packet> packet, Ipv4Address destination)
     {
       socket->SendTo (packet, 0, InetSocketAddress (destination, DVHOP_PORT));
+        
     }
 
     /**
@@ -506,23 +511,40 @@ namespace ns3 {
     void
     RoutingProtocol::RecvDvhop (Ptr<Socket> socket)
     {
-      Address sourceAddress;
-      Ptr<Packet> packet = socket->RecvFrom (sourceAddress); //Read a single packet from 'socket' and retrieve the 'sourceAddress'
+      if(m_isAlive){
 
-      InetSocketAddress inetSourceAddr = InetSocketAddress::ConvertFrom (sourceAddress);
-      Ipv4Address sender = inetSourceAddr.GetIpv4 ();
-      Ipv4Address receiver = m_socketAddresses[socket].GetLocal ();
+        Address sourceAddress;
+        Ptr<Packet> packet = socket->RecvFrom (sourceAddress); //Read a single packet from 'socket' and retrieve the 'sourceAddress'
 
-      NS_LOG_DEBUG ("sender:           " << sender);
-      NS_LOG_DEBUG ("receiver:         " << receiver);
+        InetSocketAddress inetSourceAddr = InetSocketAddress::ConvertFrom (sourceAddress);
+        Ipv4Address sender = inetSourceAddr.GetIpv4 ();
+        Ipv4Address receiver = m_socketAddresses[socket].GetLocal ();
+
+        NS_LOG_DEBUG ("sender:           " << sender);
+        NS_LOG_DEBUG ("receiver:         " << receiver);
 
 
-      FloodingHeader fHeader;
-      packet->RemoveHeader (fHeader);
-      NS_LOG_DEBUG ("Update the entry for: " << fHeader.GetBeaconAddress ());
-      UpdateHopsTo (fHeader.GetBeaconAddress (), fHeader.GetHopCount () + 1, fHeader.GetXPosition (), fHeader.GetYPosition ());
-      std::cout << "Header Dump Post Recieve (Beacon IP/Hop Count/ (X,Y) of Beacon): " << fHeader.GetBeaconAddress() << " / " << fHeader.GetHopCount() << " / ( "  << fHeader.GetXPosition() << " , " << fHeader.GetYPosition() << " ) \n"; 
+        FloodingHeader fHeader;
+        packet->RemoveHeader (fHeader);
+        NS_LOG_DEBUG ("Update the entry for: " << fHeader.GetBeaconAddress ());
+        UpdateHopsTo (fHeader.GetBeaconAddress (), fHeader.GetHopCount () + 1, fHeader.GetXPosition (), fHeader.GetYPosition ());
+        std::cout << "Header Dump Post Recieve (Beacon IP/Hop Count/ (X,Y) of Beacon): " << fHeader.GetBeaconAddress() << " / " << fHeader.GetHopCount() << " / ( "  << fHeader.GetXPosition() << " , " << fHeader.GetYPosition() << " ) \n"; 
 
+
+        // Determine if the Node dies
+        double currTime = (Simulator::Now()).GetSeconds();
+        u_int32_t chance = (rand()%40) + 1;
+        std::cout << std::endl<< chance << std::endl<< std::endl;
+
+        if((currTime > 7.5 && chance < 32) || (currTime > (Time)5.0 && chance < 18) || (currTime > (Time)2.5 && chance < 7)){
+
+          m_isAlive = false;
+          std::cout << "\n\nA Node has Died at time: " << currTime << std::endl; //<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n" << std::endl;
+        }
+      }
+      else{
+        std::cout << "\n\nCritical error on node communication.\n\n"; //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n" << std::endl;
+      }
 
     }
 

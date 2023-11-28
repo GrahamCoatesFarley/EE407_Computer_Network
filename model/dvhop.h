@@ -96,6 +96,9 @@ namespace ns3 {
       // Hop size of a beacon node
       double m_hopSize;
 
+      // Boolean to indicate if the node is still alive
+      bool m_isAlive;
+
       //This node's position info
       double m_xPosition;
       double m_yPosition;
