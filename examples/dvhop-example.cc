@@ -95,7 +95,8 @@ int main (int argc, char **argv)                          // Main loop invitatio
     NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Delcares error if the trigger condition is met.
 
   test.Run ();                                            // Initiates running sequence of DVhop simulation
-  test.Report (std::cout);                                
+  test.Report (std::cout);
+  Simulator::Destroy ();    // Recycles simulation resources post execution
   return 0;                                               // Return successful execution 
 }
 
@@ -148,7 +149,6 @@ DVHopExample::Run ()
   Simulator::Run ();        // Runs the sim
   Simulator::Destroy ();    // Recycles simulation resources post execution
 
-
 }
 
 
@@ -156,6 +156,26 @@ DVHopExample::Run ()
 void
 DVHopExample::Report (std::ostream &)                            
 {
+  // Go through all non anchor nodes and calculate the localization error
+  double totalLE = 0;
+
+  for(uint32_t i=0; i < SIZE; i++) {
+    Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
+    Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
+    if(dvhop->IsBeacon()) {
+      continue; // Dont calculate beacon error
+    }
+    Ptr <MobilityModel> mob = nodes.Get(i)->GetObject<MobilityModel>();
+
+    double dx = dvhop->GetXPosition() - mob->GetPosition().x;
+    double dy = dvhop->GetYPosition() - mob->GetPosition().y;
+    double LE = pow(pow(dx,2) + pow(dy,2), 0.5);
+
+    std::cout << "Localization Error LE for Node " << i << " = " << LE << std::endl;
+
+    totalLE += LE;
+  }
+  std::cout << "Average Localization Error LE = "<<(totalLE/(SIZE-3)) << std::endl;
 }
 
 void
@@ -178,7 +198,7 @@ DVHopExample::CreateNodes ()
                                  "MinY", DoubleValue (0.0),
                                  "DeltaX", DoubleValue (step),      // Delta (change in) Coordinate Grid Positions (step, 0)
                                  "DeltaY", DoubleValue (step),
-                                 "GridWidth", UintegerValue (5),
+                                 "GridWidth", UintegerValue (3),
                                  "LayoutType", StringValue ("RowFirst"));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility.Install (nodes);
@@ -191,24 +211,17 @@ DVHopExample::CreateBeacons ()
   // a number of times, maybe 10-15% of the max nodes as beacons?
 
   //for(uint32_t i = size; i < (size +sizeB); i++)
-  
-    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (0)->GetObject<Ipv4>()->GetRoutingProtocol ();
-  	Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
-  	dvhop->SetIsBeacon (true);
-  	dvhop->SetPosition (100, 50);
-  
 
+  uint32_t beacons[3] = {0, 5, 7}; // Node ID of our beacons
 
-  proto = nodes.Get (4)->GetObject<Ipv4>()->GetRoutingProtocol ();
-  dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
-  dvhop->SetIsBeacon (true);
-  dvhop->SetPosition (5, 10);
+  for(uint32_t i=0; i < 3; i++) {
+    Ptr <Ipv4RoutingProtocol> proto = nodes.Get(beacons[i])->GetObject<Ipv4>()->GetRoutingProtocol();
+    Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
+    dvhop->SetIsBeacon(true);
 
-
-  proto = nodes.Get (9)->GetObject<Ipv4>()->GetRoutingProtocol ();
-  dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
-  dvhop->SetIsBeacon (true);
-  dvhop->SetPosition (150, 25);
+    Ptr <MobilityModel> mob = nodes.Get(beacons[i])->GetObject<MobilityModel>();
+    dvhop->SetPosition(mob->GetPosition().x, mob->GetPosition().y);
+  }
 
 }
 
@@ -248,7 +261,7 @@ DVHopExample::InstallInternetStack ()
   interfaces = address.Assign (devices);
 
   Ptr<OutputStreamWrapper> distStream = Create<OutputStreamWrapper>("dvhop.distances", std::ios::out);
-  dvhop.PrintDistanceTableAllAt(Seconds(9), distStream);
+  dvhop.PrintDistanceTableAllAt(Seconds(totalTime), distStream);
 
   if (printRoutes)
     {
