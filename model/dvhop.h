@@ -90,6 +90,9 @@ namespace ns3 {
       //Boolean to identify if this node acts as a Beacon
       bool m_isBeacon;
 
+      // Boolean to indicate if the node is still alive
+      bool m_isAlive;
+
       //This node's position info
       double m_xPosition;
       double m_yPosition;

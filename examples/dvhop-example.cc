@@ -64,7 +64,7 @@ private:
   bool pcap;
   /// Print routes if true
   bool printRoutes;
-  std::vector<uint32_t> packetCount;
+  //std::vector<uint32_t> packetCount;
   //\}
 
   ///\name network
@@ -80,7 +80,7 @@ private:
   void InstallInternetStack ();
   void InstallApplications ();
   void CreateBeacons();
-  void PacketReceived(Ptr<const Packet> packet, uint16_t protocol, const Address & from, const Address &to);
+  //void PacketReceived(Ptr<const Packet> packet, uint16_t protocol, const Address & from, const Address &to);
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------
@@ -105,8 +105,7 @@ DVHopExample::DVHopExample () :
   step (STEP),             // Set step size between nodes
   totalTime (10),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
-  printRoutes (true),      // Enables route printing
-  packetCount(size, 0)    // Initialize packet count for each node to 0
+  printRoutes (true)      // Enables route printing
 {
 }
 
@@ -227,8 +226,8 @@ DVHopExample::CreateDevices ()
   devices = wifi.Install (wifiPhy, wifiMac, nodes);
 
   // Callback function to count received packets
-  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/Enqueue",
-  MakeCallback(&DVHopExample::PacketReceived,this));
+  //Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/Enqueue",
+  //MakeCallback(&DVHopExample::PacketReceived,this);
 
   if (pcap)
     {
@@ -258,6 +257,7 @@ DVHopExample::InstallInternetStack ()
     }
 }
 
+/*
 // Packet Count callback function
 void
 DVHopExample:: PacketReceived(Ptr<const Packet> packet, uint16_t protocol, const Address &from, const Address &to)
@@ -283,3 +283,4 @@ DVHopExample:: PacketReceived(Ptr<const Packet> packet, uint16_t protocol, const
         }
     }
 }
+*/
