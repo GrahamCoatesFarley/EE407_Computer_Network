@@ -50,14 +50,15 @@ namespace ns3 {
 
 
     RoutingProtocol::RoutingProtocol () :
-      HelloInterval (Seconds (1)),         //Send HELLO each second
-      m_htimer (Timer::CANCEL_ON_DESTROY), //Set timer for HELLO
-      m_isBeacon(false),
-      m_isAlive(true),
-      m_isCrit(false),
-      m_xPosition(12.56),
-      m_yPosition(468.5),
-      m_seqNo (0)
+      HelloInterval (Seconds (1)),          //Send HELLO each second
+      m_htimer (Timer::CANCEL_ON_DESTROY),  //Set timer for HELLO
+      m_isBeacon(false),                    // If the node is a beacon
+      m_isAlive(true),                      // If the node is alive
+      m_isCrit(false),                      // If critical conditions have been intitialized for the simulation
+      m_xPosition(12.56),                   // X Coordinate
+      m_yPosition(468.5),                   // Y Coordinate
+      m_seqNo (0),                          // Current packet sequence number
+      m_totalTime(10)                       // 10 second simulation time by default
     {
     }
 
@@ -360,9 +361,12 @@ namespace ns3 {
       *stream->GetStream ()<<"----------------- Node "<<node->GetId ()<<"-----------------"<<"\n";
       m_disTable.Print (stream);
 
-      if(m_isBeacon) {
+      if(m_isBeacon) 
+      {
         *stream->GetStream() << "Hop Size: " << m_hopSize << "\n";
-      } else {
+      } 
+      else 
+      {
         std::vector<double> hopSizes;
         for(uint32_t i=0; i < NodeList::GetNNodes (); i++) {
           Ptr <Ipv4RoutingProtocol> proto = NodeList::GetNode(i)->GetObject<Ipv4>()->GetRoutingProtocol();
@@ -409,13 +413,13 @@ namespace ns3 {
         if(m_isAlive)
           SendHello ();
         else
-          std::cout << "\n\n@" << Simulator::Now() << " , Hello fails.\n\n";
+          NS_LOG_LOGIC ("\n\n@" << Simulator::Now() << " , Hello fails.\n\n");
       }
       else
       {
         SendHello ();
       }
-      
+
       m_htimer.Cancel ();
       m_htimer.Schedule (RoutingProtocol::HelloInterval);
     }
@@ -509,6 +513,7 @@ namespace ns3 {
     RoutingProtocol::SendTo (Ptr<Socket> socket, Ptr<Packet> packet, Ipv4Address destination)
     {
       socket->SendTo (packet, 0, InetSocketAddress (destination, DVHOP_PORT));
+        
     }
 
     /**
@@ -526,16 +531,17 @@ namespace ns3 {
         // Determine if the Node dies
         double currTime = (Simulator::Now()).GetSeconds();
         u_int32_t chance = (rand()%40) + 1;
-        std::cout << std::endl<< chance << std::endl<< std::endl;
+        //std::cout << std::endl<< chance << std::endl<< std::endl;   <-- Output was used to allow for testing of death chance
 
-        if((currTime > 7.5 && chance < 32) || (currTime > (Time)5.0 && chance < 18) || (currTime > (Time)2.5 && chance < 7)){
-
+        // Nodes have a higher chance of dying at later times in the simulation
+        if((currTime > (m_totalTime * 0.75) && chance < 32) || (currTime > (m_totalTime * 0.5) && chance < 18) || (currTime > (m_totalTime * 0.25) && chance < 7))
+        {
           m_isAlive = false;
-          std::cout << "\n\nA Node has Died at time: " << currTime << std::endl; //<<"~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n" << std::endl;
+          NS_LOG_LOGIC ("\n\nA Node has Died at time: " << currTime << std::endl); 
         }
         }
         else{
-          std::cout << "\n\nCritical error on node communication.\n\n"; //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n" << std::endl;
+          NS_LOG_LOGIC ("\n\nCritical error on node communication.\n\n"); 
         }
       }
       else
@@ -561,7 +567,8 @@ namespace ns3 {
       packet->RemoveHeader (fHeader);
       NS_LOG_DEBUG ("Update the entry for: " << fHeader.GetBeaconAddress ());
       UpdateHopsTo (fHeader.GetBeaconAddress (), fHeader.GetHopCount () + 1, fHeader.GetXPosition (), fHeader.GetYPosition ());
-      std::cout << "Header Dump Post Recieve (Beacon IP/Hop Count/ (X,Y) of Beacon): " << fHeader.GetBeaconAddress() << " / " << fHeader.GetHopCount() << " / ( "  << fHeader.GetXPosition() << " , " << fHeader.GetYPosition() << " ) \n"; 
+      NS_LOG_LOGIC ( "Header Dump Post Recieve (Beacon IP/Hop Count/ (X,Y) of Beacon): " << fHeader.GetBeaconAddress() 
+        << " / " << fHeader.GetHopCount() << " / ( "  << fHeader.GetXPosition() << " , " << fHeader.GetYPosition() << " ) \n"); 
 
     }
 
