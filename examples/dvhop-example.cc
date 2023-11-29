@@ -90,7 +90,7 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // Constants for ease of size/ step adjustment
-const u_int32_t SIZE = 40;               // Number of nodes
+const u_int32_t SIZE = 20;               // Number of nodes
 const u_int32_t STEP = 40;              // Step size between nodes
 const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
 const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
@@ -279,7 +279,7 @@ DVHopExample::CreateBeacons ()
   // This is Currently hardcoded to create beacons, can use rand() between 0 and maxNode 
   // a number of times, maybe 10-15% of the max nodes as beacons?
 
-  uint32_t beacons[3] = {0, 5, 7}; // Node ID of our beacons
+  uint32_t beacons[3] = {(uint32_t)((double)size * 0.12), (uint32_t)((double)size * 0.48), (uint32_t)((double)size * 0.82)}; // Node ID of our beacons
 
   for(uint32_t i=0; i < 3; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(beacons[i])->GetObject<Ipv4>()->GetRoutingProtocol();
