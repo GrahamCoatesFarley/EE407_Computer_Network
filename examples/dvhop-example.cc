@@ -43,13 +43,19 @@ using namespace ns3;
 class DVHopExample
 {
 public:
+  /// Default constructor 
   DVHopExample ();
+  /// NonDefault Constructor with time of simulation passed
+  DVHopExample (double time);
   /// Configure script parameters, \return true on successful configuration
   bool Configure (int argc, char **argv);
-  /// Run simulation
+  /// Run simulation, boolean to determine ideal/critical scenario
   void Run (bool crit);
   /// Report results
   void Report (std::ostream & os);
+  /// Sets the simulation time (primary use in critical condition but does not effect ideal)
+  void SetSimTime ();
+
 
 private:
   ///\name parameters
@@ -84,27 +90,42 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // Constants for ease of size/ step adjustment
-const u_int32_t SIZE = 9;
-const uint32_t STEP = 40;
+const u_int32_t SIZE = 9;               // Number of nodes
+const u_int32_t STEP = 40;              // Step size between nodes
+const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
+const double SENT = -1.0;               // Sentinel Value
 
 int main (int argc, char **argv)                          // Main loop invitation 
 {
   char ans;
   bool crit = false;
+  double time = 0.0;
 
-  std::cout << "Should this be a critical simulation? (Y or N)\n";
-  std::cin >> ans;
+  std::system("CLS");
+  // User determination of whether the simulation is critical or ideal
+  std::cout << "\nShould this be a critical simulation? (Y or N)\n";
+  std::cin.get(ans);
   ans = toupper(ans);
 
   if(ans == 'Y')
     crit = true;
 
+  // User determination of simulation time
+  std::cout << "\nPlease input simulation time-span in seconds. For default time (10s) input -1\n";
+  std::cin >> time;
 
   DVHopExample test;                                      // Creates DVHop 
+
+  // Sets new simulation time if requested other than default (input not SENT)
+  if(time != SENT)
+    test = DVHopExample(abs(time)); // Ensures a non negative simulation time
+
+
+
   if (!test.Configure (argc, argv))                       // Triggers in the event test objects configuration fails 
     NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Delcares error if the trigger condition is met.
 
-  test.Run (crit);                                        // Initiates running sequence of DVhop simulation
+  test.Run (crit);                                   // Initiates running sequence of DVhop simulation
   test.Report (std::cout);
   Simulator::Destroy ();                                  // Recycles simulation resources post execution
   return 0;                                               // Return successful execution 
@@ -114,11 +135,21 @@ int main (int argc, char **argv)                          // Main loop invitatio
 DVHopExample::DVHopExample () :
   size (SIZE),              			// Sets number of nodes
   step (STEP),             // Set step size between nodes
-  totalTime (10),         // Sets simulation run time
+  totalTime (DEFAULT_TIME),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
   printRoutes (true)      // Enables route printing
 {
 }
+
+DVHopExample::DVHopExample (double time) :
+  size (SIZE),              			// Sets number of nodes
+  step (STEP),             // Set step size between nodes
+  totalTime (time),         // Sets simulation run time
+  pcap (true),            // Enables pcap generation  
+  printRoutes (true)      // Enables route printing
+{
+}
+
 
 bool
 DVHopExample::Configure (int argc, char **argv)
@@ -151,6 +182,7 @@ DVHopExample::Run (bool crit)
     MakeCritical();
 
   CreateBeacons();                  // Converts a number of nodes to beacons
+  SetSimTime();
 
   std::cout << "Starting simulation for " << totalTime << " s ...\n";
 
@@ -285,4 +317,16 @@ DVHopExample::InstallInternetStack ()
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("dvhop.routes", std::ios::out);
       dvhop.PrintRoutingTableAllAt (Seconds (8), routingStream);
     }
+}
+
+void
+DVHopExample::SetSimTime ()
+{
+  for(uint32_t i = 0; i < size; ++i)
+  {
+    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (i)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  	Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
+  	dvhop->SetSimulationTime (totalTime);
+
+  }
 }

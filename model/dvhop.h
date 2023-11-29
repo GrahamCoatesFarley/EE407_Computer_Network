@@ -67,6 +67,9 @@ namespace ns3 {
       // Returns the hop size of the beacon
       double GetHopSize()               { return m_hopSize;}
 
+      //Sets the total time of the simulation
+      void SetSimulationTime(double time) { m_totalTime = time; }
+
       // Prints the node ID,Beacon andress and Info from the Distance Table
       void  PrintDistances(Ptr<OutputStreamWrapper> stream, Ptr<Node> node) const;        
     private:
@@ -115,6 +118,9 @@ namespace ns3 {
       std::map< Ptr<Socket>, Ipv4InterfaceAddress > m_socketAddresses;
 
       uint32_t    m_seqNo;
+
+      // Total Time of the simulation to run
+      double      m_totalTime;
 
 
 
