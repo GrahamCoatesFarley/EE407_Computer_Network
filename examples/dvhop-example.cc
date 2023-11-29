@@ -47,7 +47,7 @@ public:
   /// Configure script parameters, \return true on successful configuration
   bool Configure (int argc, char **argv);
   /// Run simulation
-  void Run ();
+  void Run (bool crit);
   /// Report results
   void Report (std::ostream & os);
 
@@ -80,7 +80,7 @@ private:
   void InstallInternetStack ();
   void InstallApplications ();
   void CreateBeacons();
-  void PacketReceived(Ptr<const Packet> packet, uint16_t protocol, const Address & from, const Address &to);
+  void MakeCritical();
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------
@@ -90,13 +90,24 @@ const uint32_t STEP = 40;
 
 int main (int argc, char **argv)                          // Main loop invitation 
 {
+  char ans;
+  bool crit = false;
+
+  std::cout << "Should this be a critical simulation? (Y or N)\n";
+  std::cin >> ans;
+  ans = toupper(ans);
+
+  if(ans == 'Y')
+    crit = true;
+
+
   DVHopExample test;                                      // Creates DVHop 
   if (!test.Configure (argc, argv))                       // Triggers in the event test objects configuration fails 
     NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Delcares error if the trigger condition is met.
 
-  test.Run ();                                            // Initiates running sequence of DVhop simulation
+  test.Run (crit);                                        // Initiates running sequence of DVhop simulation
   test.Report (std::cout);
-  Simulator::Destroy ();    // Recycles simulation resources post execution
+  Simulator::Destroy ();                                  // Recycles simulation resources post execution
   return 0;                                               // Return successful execution 
 }
 
@@ -131,12 +142,15 @@ DVHopExample::Configure (int argc, char **argv)
 }
 
 void
-DVHopExample::Run ()
+DVHopExample::Run (bool crit)
 {
 //  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", UintegerValue (1)); // enable rts cts all the time.
   CreateNodes ();                  // Creates nodes for simulation
   CreateDevices ();                // Installs devices on Nodes
   InstallInternetStack ();         // Establishes Internet topoglogy
+
+  if(crit)
+    MakeCritical();
 
   CreateBeacons();                  // Converts a number of nodes to beacons
 
@@ -206,12 +220,22 @@ DVHopExample::CreateNodes ()
 }
 
 void
+DVHopExample::MakeCritical ()
+{
+  for(uint32_t i = 0; i < size; ++i)
+  {
+    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (i)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  	Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
+  	dvhop->SetIsCritical (true);
+
+  }
+}
+
+void
 DVHopExample::CreateBeacons ()
 {
   // This is Currently hardcoded to create beacons, can use rand() between 0 and maxNode 
   // a number of times, maybe 10-15% of the max nodes as beacons?
-
-  //for(uint32_t i = size; i < (size +sizeB); i++)
 
   uint32_t beacons[3] = {0, 5, 7}; // Node ID of our beacons
 
@@ -239,9 +263,6 @@ DVHopExample::CreateDevices ()
   wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue ("OfdmRate6Mbps"), "RtsCtsThreshold", UintegerValue (0));
   devices = wifi.Install (wifiPhy, wifiMac, nodes);
 
-  // Callback function to count received packets
-  Config::ConnectWithoutContext("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/Enqueue",
-  MakeCallback(&DVHopExample::PacketReceived,this));
 
   if (pcap)
     {
@@ -268,31 +289,5 @@ DVHopExample::InstallInternetStack ()
     {
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("dvhop.routes", std::ios::out);
       dvhop.PrintRoutingTableAllAt (Seconds (8), routingStream);
-    }
-}
-
-// Packet Count callback function
-void
-DVHopExample:: PacketReceived(Ptr<const Packet> packet, uint16_t protocol, const Address &from, const Address &to)
-{
-    // Find the node index from the device address
-    for (uint32_t i = 0; i < size; ++i)
-    {
-        if (nodes.Get(i)->GetDevice(0)->GetAddress() == from)
-        {
-            packetCount[i]++;
-            std::cout << "Node " << i << " received a packet. Total packets received: " << packetCount[i] << std::endl;
-
-            // Add logic to kill the node if the packet count exceeds a threshold
-            if (packetCount[i] >= 2) // Adjust the threshold as needed
-            {
-                std::cout << "\nNode " << i << " will be killed." << std::endl;
-                // Add logic to simulate node shutdown or take any other action
-                // For example, you can use the following line to simulate node shutdown
-                nodes.Get(i)->GetDevice(0)->SetIfIndex(-1);
-            }
-
-            break;
-        }
     }
 }
