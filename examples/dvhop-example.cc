@@ -90,7 +90,7 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // Constants for ease of size/ step adjustment
-const u_int32_t SIZE = 9;               // Number of nodes
+const u_int32_t SIZE = 40;               // Number of nodes
 const u_int32_t STEP = 40;              // Step size between nodes
 const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
 const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
@@ -121,7 +121,10 @@ int main (int argc, char **argv)                          // Main loop invitatio
   ansB = toupper(ansB);
 
   if (ansB == 'R')
+  {
+    srand(time * DEFAULT_SEED);
     seed = rand()%99999 + 10000;
+  }
   else
     seed = DEFAULT_SEED;
 
