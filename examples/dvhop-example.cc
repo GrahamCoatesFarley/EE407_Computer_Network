@@ -64,7 +64,6 @@ private:
   bool pcap;
   /// Print routes if true
   bool printRoutes;
-  std::vector<uint32_t> packetCount;
   //\}
 
   ///\name network
@@ -85,7 +84,7 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // Constants for ease of size/ step adjustment
-const u_int32_t SIZE = 40;
+const u_int32_t SIZE = 9;
 const uint32_t STEP = 40;
 
 int main (int argc, char **argv)                          // Main loop invitation 
@@ -162,10 +161,7 @@ DVHopExample::Run (bool crit)
   AnimationInterface anim("anim_ideal.xml");   // Establishes the file for animation generation of simulation    
 
   Simulator::Run ();        // Runs the sim
-  Simulator::Destroy ();    // Recycles simulation resources post execution
-
 }
-
 
 // TODO: Report simulation result 
 void
@@ -174,7 +170,7 @@ DVHopExample::Report (std::ostream &)
   // Go through all non anchor nodes and calculate the localization error
   double totalLE = 0;
 
-  for(uint32_t i=0; i < SIZE; i++) {
+  for(uint32_t i=0; i < size; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
     if(dvhop->IsBeacon()) {
