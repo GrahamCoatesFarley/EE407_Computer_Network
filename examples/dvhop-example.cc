@@ -47,8 +47,8 @@ public:
   DVHopExample ();
   /// NonDefault Constructor with time of simulation passed
   DVHopExample (double time);
-  /// Configure script parameters, \return true on successful configuration
-  bool Configure (int argc, char **argv);
+  /// Configure script parameters, \return true on successful configuration, passed seed for configuration
+  bool Configure (int argc, char **argv, u_int32_t seed);
   /// Run simulation, boolean to determine ideal/critical scenario
   void Run (bool crit);
   /// Report results
@@ -93,36 +93,47 @@ private:
 const u_int32_t SIZE = 9;               // Number of nodes
 const u_int32_t STEP = 40;              // Step size between nodes
 const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
+const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
 const double SENT = -1.0;               // Sentinel Value
 
 int main (int argc, char **argv)                          // Main loop invitation 
 {
-  char ans;
+  char ansA, ansB;
   bool crit = false;
   double time = 0.0;
+  u_int32_t seed = 0;
 
-  std::system("CLS");
   // User determination of whether the simulation is critical or ideal
   std::cout << "\nShould this be a critical simulation? (Y or N)\n";
-  std::cin.get(ans);
-  ans = toupper(ans);
+  std::cin.get(ansA);
+  ansA = toupper(ansA);
 
-  if(ans == 'Y')
+  if(ansA == 'Y')
     crit = true;
 
   // User determination of simulation time
   std::cout << "\nPlease input simulation time-span in seconds. For default time (10s) input -1\n";
   std::cin >> time;
 
-  DVHopExample test;                                      // Creates DVHop 
+  // User determination of execution seed
+  std::cout << "\nShould the simulation run on a default or random seed? (R for Random, anything else for Default)\n";
+  std::cin >> ansB;
+  ansB = toupper(ansB);
 
+  if (ansB == 'R')
+    seed = rand()%99999 + 10000;
+  else
+    seed = DEFAULT_SEED;
+
+  std::cout << "\n\n" << seed <<"\n\n";
+
+  DVHopExample test;                                      // Creates DVHop 
   // Sets new simulation time if requested other than default (input not SENT)
   if(time != SENT)
     test = DVHopExample(abs(time)); // Ensures a non negative simulation time
 
 
-
-  if (!test.Configure (argc, argv))                       // Triggers in the event test objects configuration fails 
+  if (!test.Configure (argc, argv, seed))                       // Triggers in the event test objects configuration fails 
     NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Delcares error if the trigger condition is met.
 
   test.Run (crit);                                   // Initiates running sequence of DVhop simulation
@@ -152,12 +163,13 @@ DVHopExample::DVHopExample (double time) :
 
 
 bool
-DVHopExample::Configure (int argc, char **argv)
+DVHopExample::Configure (int argc, char **argv, u_int32_t seed)
 {
   // Enable DVHop logs by default. Comment this if too noisy
   //LogComponentEnable("DVHopRoutingProtocol", LOG_LEVEL_ALL);
-
-  SeedManager::SetSeed (12345);
+  
+  SeedManager::SetSeed (seed);
+  
   CommandLine cmd;
 
   cmd.AddValue ("pcap", "Write PCAP traces.", pcap);
