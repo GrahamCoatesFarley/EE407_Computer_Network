@@ -54,7 +54,9 @@ namespace ns3 {
       void SetIsCritical(bool isCritical) { m_isCrit = isCritical; } 
 
       //Sets if node is a Beacon
-      void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }   
+      void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }
+      //Sets beacon hop size
+      void SetHopSize(double hopSize)    { m_hopSize = hopSize; }
       // Sets coordinate location of a node
       void SetPosition(double x, double y) { m_xPosition = x; m_yPosition = y; }         
       // Gets node coordinates
@@ -62,6 +64,8 @@ namespace ns3 {
       double GetYPosition()               { return m_yPosition;}                       
       // Predicates on if a node is a beacon
       bool  IsBeacon()                   { return m_isBeacon;}                            // Determines in the node is flagged as a beacon (knows its location)
+      // Returns the hop size of the beacon
+      double GetHopSize()               { return m_hopSize;}
 
       // Prints the node ID,Beacon andress and Info from the Distance Table
       void  PrintDistances(Ptr<OutputStreamWrapper> stream, Ptr<Node> node) const;        
@@ -94,10 +98,11 @@ namespace ns3 {
 
       //Boolean to identify if this node acts as a Beacon
       bool m_isBeacon;
-
       // Boolean to indicate if the node is still alive
       bool m_isAlive;
       bool m_isCrit;
+      // Hop size of a beacon node
+      double m_hopSize;
 
       //This node's position info
       double m_xPosition;

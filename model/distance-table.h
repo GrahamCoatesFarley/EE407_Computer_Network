@@ -7,11 +7,14 @@
 #include "ns3/nstime.h"
 #include "ns3/output-stream-wrapper.h"
 
+
+struct Point{
+  double x, y;
+};
 namespace ns3
 {
   namespace dvhop
   {
-
 
     typedef std::pair<double, double> Position;
 
@@ -97,6 +100,22 @@ namespace ns3
        * @param yPos Y coordinate
        */
       void AddBeacon(Ipv4Address beacon, uint16_t hops, double xPos, double yPos);
+
+      /**
+       * @brief Calculate the Hop size of this an beacon node
+       * @param x X coordinate
+       * @param y Y coordinate
+       */
+      double CalculateHopSize(uint16_t x, uint16_t y) const;
+
+
+      /**
+       * Trilateration Function
+       * @param hopSize
+       * @return
+       */
+      Point Trilateration(Ptr<OutputStreamWrapper> os, std::vector<double> hopSizes) const;
+
     private:
       std::map<Ipv4Address, BeaconInfo>  m_table;
     };

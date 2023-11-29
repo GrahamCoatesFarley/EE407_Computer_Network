@@ -12,6 +12,7 @@
 #include "ns3/adhoc-wifi-mac.h"
 #include "ns3/string.h"
 #include "ns3/pointer.h"
+#include "ns3/node-list.h"
 
 
 
@@ -358,6 +359,27 @@ namespace ns3 {
     {
       *stream->GetStream ()<<"----------------- Node "<<node->GetId ()<<"-----------------"<<"\n";
       m_disTable.Print (stream);
+
+      if(m_isBeacon) {
+        *stream->GetStream() << "Hop Size: " << m_hopSize << "\n";
+      } else {
+        std::vector<double> hopSizes;
+        for(uint32_t i=0; i < NodeList::GetNNodes (); i++) {
+          Ptr <Ipv4RoutingProtocol> proto = NodeList::GetNode(i)->GetObject<Ipv4>()->GetRoutingProtocol();
+          Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
+          if(dvhop->IsBeacon()) {
+            hopSizes.push_back(dvhop->GetHopSize());
+          }
+        }
+
+        Point location = m_disTable.Trilateration(stream, hopSizes);
+
+        Ptr <Ipv4RoutingProtocol> proto = node->GetObject<Ipv4>()->GetRoutingProtocol();
+        Ptr <dvhop::RoutingProtocol> nodeDvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
+        nodeDvhop->SetPosition(location.x, location.y);
+
+        *stream->GetStream() << "Estimated Position: (" << location.x << ", " << location.y << ")" << std::endl;
+      }
     }
 
     int64_t
@@ -393,7 +415,7 @@ namespace ns3 {
       {
         SendHello ();
       }
-
+      
       m_htimer.Cancel ();
       m_htimer.Schedule (RoutingProtocol::HelloInterval);
     }
@@ -487,7 +509,6 @@ namespace ns3 {
     RoutingProtocol::SendTo (Ptr<Socket> socket, Ptr<Packet> packet, Ipv4Address destination)
     {
       socket->SendTo (packet, 0, InetSocketAddress (destination, DVHOP_PORT));
-        
     }
 
     /**
@@ -569,8 +590,13 @@ namespace ns3 {
           return;
         }
 
-      if( oldHops > newHops || oldHops == 0) //Update only when a shortest path is found
-        m_disTable.AddBeacon (beacon, newHops, x, y);
+      if( oldHops > newHops || oldHops == 0) {//Update only when a shortest path is found
+        m_disTable.AddBeacon(beacon, newHops, x, y);
+
+        if(m_isBeacon) { // Recalculate hop sizes to other beacons
+          m_hopSize = m_disTable.CalculateHopSize(m_xPosition, m_yPosition);
+        }
+      }
     }
 
 
