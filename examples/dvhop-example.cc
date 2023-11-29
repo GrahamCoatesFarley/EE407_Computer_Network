@@ -116,8 +116,7 @@ DVHopExample::DVHopExample () :
   step (STEP),             // Set step size between nodes
   totalTime (10),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
-  printRoutes (true),      // Enables route printing
-  packetCount(size, 0)    // Initialize packet count for each node to 0
+  printRoutes (true)      // Enables route printing
 {
 }
 
