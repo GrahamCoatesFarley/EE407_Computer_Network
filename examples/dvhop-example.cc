@@ -104,9 +104,9 @@ int main (int argc, char **argv)                          // Main loop invitatio
   if (!test.Configure (argc, argv))                       // Triggers in the event test objects configuration fails 
     NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Delcares error if the trigger condition is met.
 
-  test.Run (crit);                                            // Initiates running sequence of DVhop simulation
+  test.Run (crit);                                        // Initiates running sequence of DVhop simulation
   test.Report (std::cout);
-  Simulator::Destroy ();    // Recycles simulation resources post execution
+  Simulator::Destroy ();                                  // Recycles simulation resources post execution
   return 0;                                               // Return successful execution 
 }
 
@@ -116,7 +116,8 @@ DVHopExample::DVHopExample () :
   step (STEP),             // Set step size between nodes
   totalTime (10),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
-  printRoutes (true)      // Enables route printing
+  printRoutes (true),      // Enables route printing
+  packetCount(size, 0)    // Initialize packet count for each node to 0
 {
 }
 

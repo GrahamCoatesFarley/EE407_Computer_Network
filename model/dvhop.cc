@@ -415,7 +415,7 @@ namespace ns3 {
       {
         SendHello ();
       }
-
+      
       m_htimer.Cancel ();
       m_htimer.Schedule (RoutingProtocol::HelloInterval);
     }
@@ -509,7 +509,6 @@ namespace ns3 {
     RoutingProtocol::SendTo (Ptr<Socket> socket, Ptr<Packet> packet, Ipv4Address destination)
     {
       socket->SendTo (packet, 0, InetSocketAddress (destination, DVHOP_PORT));
-        
     }
 
     /**
