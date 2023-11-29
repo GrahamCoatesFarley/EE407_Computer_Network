@@ -50,8 +50,11 @@ namespace ns3 {
       // Assigns a random value to the stream
       int64_t AssignStreams(int64_t stream);
 
+      // Stes if the Simulation is Critical
+      void SetIsCritical(bool isCritical) { m_isCrit = isCritical; } 
+
       //Sets if node is a Beacon
-      void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }     
+      void SetIsBeacon(bool isBeacon)    { m_isBeacon = isBeacon; }   
       // Sets coordinate location of a node
       void SetPosition(double x, double y) { m_xPosition = x; m_yPosition = y; }         
       // Gets node coordinates
@@ -70,6 +73,8 @@ namespace ns3 {
       // Interacts with Recieved packets, 
       // updating hop count and beacon address from packet header
       void        RecvDvhop(Ptr<Socket> socket);
+      // Middle Functionn to allow for Critical Simulation
+      void        Recieve(Ptr<Socket> socket);
       // Finds socket based on Interface IP
       Ptr<Socket> FindSocketWithInterfaceAddress (Ipv4InterfaceAddress iface) const;
       //In case there exists a route to the destination, the packet is forwarded
@@ -92,6 +97,7 @@ namespace ns3 {
 
       // Boolean to indicate if the node is still alive
       bool m_isAlive;
+      bool m_isCrit;
 
       //This node's position info
       double m_xPosition;
