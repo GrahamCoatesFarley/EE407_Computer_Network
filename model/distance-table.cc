@@ -109,6 +109,67 @@ namespace ns3
       return os;
     }
 
+    // Calculate the ho size of a beacon = Sum (all other anchors as i) SQRT((x-xi)^2 + (y-yi)^2)
+    double
+    DistanceTable::CalculateHopSize (uint16_t x, uint16_t y) const
+    {
+      double up = 0;
+      double down = 0;
+      for(std::map<Ipv4Address,BeaconInfo>::const_iterator j = m_table.begin (); j != m_table.end (); ++j)
+      {
+        uint16_t x_i = j->second.GetPosition().first;
+        uint16_t y_i = j->second.GetPosition().second;
+
+        up += sqrt(pow(x-x_i, 2) + pow(y-y_i, 2));
+        down += j->second.GetHops();
+      }
+
+      double hop_size = up/down;
+      return hop_size;
+    }
+
+    Point
+    DistanceTable::Trilateration(Ptr<OutputStreamWrapper> os, std::vector<double> hopSize) const {
+      Point points[3];
+      double distances[3];
+
+      uint16_t counter = 0;
+      *os->GetStream () << "Distance entries\n";
+      for(std::map<Ipv4Address,BeaconInfo>::const_iterator j = m_table.begin (); j != m_table.end (); ++j)
+      {
+        points[counter] = {j->second.GetPosition().first, j->second.GetPosition().second};
+        distances[counter] = hopSize[counter] * j->second.GetHops();
+
+        // Beacon IP Address     Distance
+        *os->GetStream () << j->first << "\t" << distances[counter] << std::endl;
+        counter++;
+      }
+
+      Point location;
+      double ex = points[1].x - points[0].x;
+      double ey = points[1].y - points[0].y;
+      double ez = points[1].x * points[1].x - points[0].x * points[0].x +
+                  points[1].y * points[1].y - points[0].y * points[0].y +
+                  distances[0] * distances[0] - distances[1] * distances[1];
+
+      double fx = points[2].x - points[0].x;
+      double fy = points[2].y - points[0].y;
+      double fz = points[2].x * points[2].x - points[0].x * points[0].x +
+                  points[2].y * points[2].y - points[0].y * points[0].y +
+                  distances[0] * distances[0] - distances[2] * distances[2];
+
+      double denominator = 2 * (ex * fy - ey * fx);
+      if (std::abs(denominator) < 1e-6) {
+        *os->GetStream () << "The points are collinear or too close for trilateration!" << std::endl;
+      }
+
+      location.x = (ez * fy - ey * fz) / denominator;
+      location.y = (ex * fz - ez * fx) / denominator;
+
+      return location;
+
+    }
+
   }
 }
 
