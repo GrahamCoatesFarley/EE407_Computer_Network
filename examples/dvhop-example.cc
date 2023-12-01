@@ -91,7 +91,7 @@ private:
 //----------------------------------------------------------------------------------------------------------------------------------
 // Constants for ease of size/ step adjustment
 const u_int32_t SIZE = 20;               // Number of nodes
-const u_int32_t STEP = 40;              // Step size between nodes
+const u_int32_t STEP = 5;              // Step size between nodes
 const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
 const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
 const double SENT = -1.0;               // Sentinel Value
