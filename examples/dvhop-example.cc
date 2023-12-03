@@ -89,6 +89,7 @@ private:
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------
+
 // Constants for ease of size/ step adjustment
 const u_int32_t SIZE = 20;               // Number of nodes
 const u_int32_t STEP = 5;              // Step size between nodes
@@ -215,11 +216,14 @@ DVHopExample::Report (std::ostream &)
 {
   // Go through all non anchor nodes and calculate the localization error
   double totalLE = 0;
+  u_int32_t totalBeacons = 0;
+  u_int32_t tempSize = SIZE;
 
   for(uint32_t i=0; i < size; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
     if(dvhop->IsBeacon()) {
+      totalBeacons += 1;
       continue; // Dont calculate beacon error
     }
     Ptr <MobilityModel> mob = nodes.Get(i)->GetObject<MobilityModel>();
@@ -230,9 +234,14 @@ DVHopExample::Report (std::ostream &)
 
     std::cout << "Localization Error LE for Node " << i << " = " << LE << std::endl;
 
-    totalLE += LE;
+    if (!isinf(LE)){
+      totalLE += LE;
+    }
+    else{
+      tempSize -= 1;
+    }
   }
-  std::cout << "Average Localization Error LE = "<<(totalLE/(SIZE-3)) << std::endl;
+  std::cout << "Average Localization Error LE = "<<(totalLE/(tempSize-totalBeacons)) << std::endl;
 }
 
 void
@@ -279,9 +288,10 @@ DVHopExample::CreateBeacons ()
   // This is Currently hardcoded to create beacons, can use rand() between 0 and maxNode 
   // a number of times, maybe 10-15% of the max nodes as beacons?
 
+  uint32_t beaconCount = 3;
   uint32_t beacons[3] = {(uint32_t)((double)size * 0.12), (uint32_t)((double)size * 0.48), (uint32_t)((double)size * 0.82)}; // Node ID of our beacons
 
-  for(uint32_t i=0; i < 3; i++) {
+  for(uint32_t i=0; i < beaconCount; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(beacons[i])->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
     dvhop->SetIsBeacon(true);
