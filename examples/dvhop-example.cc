@@ -53,6 +53,8 @@ public:
   void Report (std::ostream & os);
   /// Sets the simulation time (primary use in critical condition but does not effect ideal)
   void SetSimTime ();
+  /// Sets the simulation time (primary use in critical condition but does not effect ideal)
+  void PrintNodes ();
 
 
 private:
@@ -66,6 +68,8 @@ private:
   bool pcap;
   /// Print routes if true
   bool printRoutes;
+  // Percentage of beacon nodes
+  uint32_t beaconPercentage;
   //\}
 
   ///\name network
@@ -87,10 +91,11 @@ private:
 //----------------------------------------------------------------------------------------------------------------------------------
 
 // Constants for ease of size
-const u_int32_t SIZE = 200;               // Number of nodes
-const u_int32_t DEFAULT_TIME = 50;      // Default simulation time
+const u_int32_t SIZE = 100;               // Number of nodes
+const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
 const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
 const double SENT = -1.0;               // Sentinel Value
+const u_int32_t DEFAULT_BEACON_PERCENTAGE = 25;      // Default percentage of beacons 25%
 
 int main (int argc, char **argv)                          // Main loop invitation 
 {
@@ -108,7 +113,7 @@ int main (int argc, char **argv)                          // Main loop invitatio
     crit = true;
 
   // User determination of simulation time
-  std::cout << "\nPlease input simulation time-span in seconds. For default time (10s) input -1\n";
+  std::cout << "\nPlease input simulation time-span in seconds. For default time ("<< DEFAULT_TIME <<"s) input -1\n";
   std::cin >> time;
 
   // User determination of execution seed
@@ -145,8 +150,9 @@ int main (int argc, char **argv)                          // Main loop invitatio
 DVHopExample::DVHopExample () :
   size (SIZE),              			// Sets number of nodes
   totalTime (DEFAULT_TIME),         // Sets simulation run time
-  pcap (true),            // Enables pcap generation  
-  printRoutes (true)      // Enables route printing
+  pcap (false),            // Enables pcap generation
+  printRoutes (true),      // Enables route printing
+  beaconPercentage (DEFAULT_BEACON_PERCENTAGE)      // Set the default beacon percentage to 25
 {
 }
 
@@ -154,7 +160,8 @@ DVHopExample::DVHopExample (double time) :
   size (SIZE),              			// Sets number of nodes
   totalTime (time),         // Sets simulation run time
   pcap (false),            // Enables pcap generation
-  printRoutes (true)      // Enables route printing
+  printRoutes (true),      // Enables route printing
+  beaconPercentage (DEFAULT_BEACON_PERCENTAGE)      // Set the default beacon percentage to 25
 {
 }
 
@@ -173,6 +180,7 @@ DVHopExample::Configure (int argc, char **argv, u_int32_t seed)
   cmd.AddValue ("printRoutes", "Print routing table dumps.", printRoutes);
   cmd.AddValue ("size", "Number of nodes.", size);
   cmd.AddValue ("time", "Simulation time, s.", totalTime);
+  cmd.AddValue ("beaconPercentage", "Percentage of beacons.", beaconPercentage);
 
   cmd.Parse (argc, argv);
   return true;
@@ -272,21 +280,40 @@ DVHopExample::MakeCritical ()
 void
 DVHopExample::CreateBeacons ()
 {
-  // This is Currently hardcoded to create beacons, can use rand() between 0 and maxNode 
-  // a number of times, maybe 10-15% of the max nodes as beacons?
-
-  uint32_t beaconCount = 3;
-  uint32_t beacons[3] = {(uint32_t)((double)size * 0.12), (uint32_t)((double)size * 0.48), (uint32_t)((double)size * 0.82)}; // Node ID of our beacons
+  // Uses beacon percentage to determine the number of beacons and then randomly selecting them
+  uint32_t beaconCount = (beaconPercentage * size) / 100;
+//  uint32_t beacons[3] = {(uint32_t)((double)size * 0.12), (uint32_t)((double)size * 0.48), (uint32_t)((double)size * 0.82)}; // Node ID of our beacons
 
   for(uint32_t i=0; i < beaconCount; i++) {
-    Ptr <Ipv4RoutingProtocol> proto = nodes.Get(beacons[i])->GetObject<Ipv4>()->GetRoutingProtocol();
+    Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
     dvhop->SetIsBeacon(true);
 
-    Ptr <MobilityModel> mob = nodes.Get(beacons[i])->GetObject<MobilityModel>();
+    Ptr <MobilityModel> mob = nodes.Get(i)->GetObject<MobilityModel>();
     dvhop->SetPosition(mob->GetPosition().x, mob->GetPosition().y);
   }
 
+  std::cout << "Beacon Nodes has been created: " << beaconPercentage <<"% " << beaconCount<< "/" << size<< std::endl;
+
+  PrintNodes();
+}
+
+void
+DVHopExample::PrintNodes ()
+{
+  Ptr<OutputStreamWrapper> distStream = Create<OutputStreamWrapper>("nodes.csv", std::ios::out);
+  for(uint32_t i = 0; i < size; ++i)
+  {
+    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (i)->GetObject<Ipv4>()->GetRoutingProtocol ();
+    Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
+    Ptr <MobilityModel> mob = nodes.Get(i)->GetObject<MobilityModel>();
+
+    if (dvhop->IsBeacon()) {
+      *distStream->GetStream () <<  mob->GetPosition().x << "," << mob->GetPosition().y << ",1" << std::endl;
+    } else {
+      *distStream->GetStream () <<  mob->GetPosition().x << "," << mob->GetPosition().y << ",0" << std::endl;
+    }
+  }
 }
 
 
