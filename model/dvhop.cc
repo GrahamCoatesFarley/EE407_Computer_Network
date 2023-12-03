@@ -55,8 +55,9 @@ namespace ns3 {
       m_isBeacon(false),                    // If the node is a beacon
       m_isAlive(true),                      // If the node is alive
       m_isCrit(false),                      // If critical conditions have been intitialized for the simulation
-      m_xPosition(12.56),                   // X Coordinate
-      m_yPosition(468.5),                   // Y Coordinate
+      m_hopSize(-1.0),                      // Hop Size
+      m_xPosition(-1.0),                   // X Coordinate
+      m_yPosition(-1.0),                   // Y Coordinate
       m_seqNo (0),                          // Current packet sequence number
       m_totalTime(10)                       // 10 second simulation time by default
     {
@@ -367,28 +368,21 @@ namespace ns3 {
       } 
       else 
       {
-        std::vector<double> hopSizes;
-        for(uint32_t i=0; i < NodeList::GetNNodes (); i++) {
-          Ptr <Ipv4RoutingProtocol> proto = NodeList::GetNode(i)->GetObject<Ipv4>()->GetRoutingProtocol();
-          Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
-          if(dvhop->IsBeacon()) {
-            hopSizes.push_back(dvhop->GetHopSize());
-          }
-        }
-
-        Point location = m_disTable.Trilateration(stream, hopSizes);
-        Data info = m_disTable.ComputeData(stream, hopSizes);
+        Data info = ComputeData();
 
         Ptr <Ipv4RoutingProtocol> proto = node->GetObject<Ipv4>()->GetRoutingProtocol();
-        Ptr <dvhop::RoutingProtocol> nodeDvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
-        nodeDvhop->SetPosition(location.x, location.y);
-        //nodeDvhop->SetData(info)
+        Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
+        if(dvhop->GetXPosition() == -1 && dvhop->GetYPosition() == -1) { // Making sure we were able to calculate location
+          *stream->GetStream() << "Unable to perform Trilateration due either beacons being <3, on the same line or too close" << std::endl;
+        }else {
+          Ptr <MobilityModel> mob = node->GetObject<MobilityModel>();
+          *stream->GetStream() << "Actual Position: (" << mob->GetPosition().x << ", " << mob->GetPosition().y << ")" << std::endl;
+          *stream->GetStream() << "Estimated Position: (" << dvhop->GetXPosition() << ", " << dvhop->GetYPosition() << ")" << std::endl;
+        }
 
-        *stream->GetStream() << "Estimated Position: (" << location.x << ", " << location.y << ")" << std::endl;
-
-        *stream->GetStream() << "Avgerage distance from beacons: " << info.avgDist << std::endl;
-        *stream->GetStream() << "Avgerage number of hops from beacons: " << info.avgHops<< std::endl;
-        *stream->GetStream() << "Avgerage latency from beacons: " << info.avgLat<< std::endl;
+        *stream->GetStream() << "Average distance from beacons: " << info.avgDist << std::endl;
+        *stream->GetStream() << "Average number of hops from beacons: " << info.avgHops<< std::endl;
+        *stream->GetStream() << "Average latency from beacons: " << info.avgLat<< std::endl;
       }
     }
 
@@ -452,7 +446,6 @@ namespace ns3 {
         {
           Ptr<Socket> socket = j->first;
           Ipv4InterfaceAddress iface = j->second;
-          /*TODO: Remove the hardcoded position*/
 
           std::vector<Ipv4Address> knownBeacons = m_disTable.GetKnownBeacons ();
           std::vector<Ipv4Address>::const_iterator addr;
@@ -464,6 +457,7 @@ namespace ns3 {
                                          beaconPos.second,             //Y Position
                                          m_seqNo++,                    //Sequence Numbr
                                          m_disTable.GetHopsTo (*addr), //Hop Count
+                                         m_disTable.GetHopSizeOf (*addr), //Hop Size
                                          *addr);                       //Beacon Address
               NS_LOG_DEBUG (iface.GetLocal ()<< " Sending Hello...");
               Ptr<Packet> packet = Create<Packet>();
@@ -488,8 +482,9 @@ namespace ns3 {
               //Create a HELLO Packet for each known Beacon to this node
               FloodingHeader helloHeader(m_xPosition,                 //X Position
                                          m_yPosition,                 //Y Position
-                                         m_seqNo++,                   //Sequence Numbr
+                                         m_seqNo++,                   //Sequence Number
                                          0,                           //Hop Count
+                                         m_hopSize,                   //Hop Size
                                          iface.GetLocal ());          //Beacon Address
 //              std::cout <<__FILE__<< __LINE__ << helloHeader << std::endl;
 
@@ -572,7 +567,7 @@ namespace ns3 {
       FloodingHeader fHeader;
       packet->RemoveHeader (fHeader);
       NS_LOG_DEBUG ("Update the entry for: " << fHeader.GetBeaconAddress ());
-      UpdateHopsTo (fHeader.GetBeaconAddress (), fHeader.GetHopCount () + 1, fHeader.GetXPosition (), fHeader.GetYPosition ());
+      UpdateHopsTo (fHeader.GetBeaconAddress (), fHeader.GetHopCount () + 1, fHeader.GetHopSize (), fHeader.GetXPosition (), fHeader.GetYPosition ());
       NS_LOG_LOGIC ( "Header Dump Post Recieve (Beacon IP/Hop Count/ (X,Y) of Beacon): " << fHeader.GetBeaconAddress() 
         << " / " << fHeader.GetHopCount() << " / ( "  << fHeader.GetXPosition() << " , " << fHeader.GetYPosition() << " ) \n"); 
 
@@ -595,7 +590,7 @@ namespace ns3 {
     }
 
     void
-    RoutingProtocol::UpdateHopsTo (Ipv4Address beacon, uint16_t newHops, double x, double y)
+    RoutingProtocol::UpdateHopsTo (Ipv4Address beacon, uint16_t newHops, double newHopSize, double x, double y)
     {
       uint16_t oldHops = m_disTable.GetHopsTo (beacon);
       if (m_ipv4->GetInterfaceForAddress (beacon) >= 0){
@@ -604,16 +599,122 @@ namespace ns3 {
         }
 
       if( oldHops > newHops || oldHops == 0) {//Update only when a shortest path is found
-        m_disTable.AddBeacon(beacon, newHops, x, y);
+        m_disTable.AddBeacon(beacon, newHops, newHopSize, x, y);
 
         if(m_isBeacon) { // Recalculate hop sizes to other beacons
-          m_hopSize = m_disTable.CalculateHopSize(m_xPosition, m_yPosition);
+          RecalculateHopSize();
+        }else if( newHopSize > 0 ) {
+          Trilateration();
         }
+      } else if( newHopSize > 0 && !m_isBeacon) {//Also update hop size if its available only for regular nodes, but hop counts remains
+        m_disTable.AddBeacon(beacon, oldHops, newHopSize, x, y);
+        Trilateration();
       }
     }
 
+    // Calculate the ho size of a beacon = Sum (all other anchors as i) SQRT((x-xi)^2 + (y-yi)^2)
+    void
+    RoutingProtocol::RecalculateHopSize ()
+    {
+      double up = 0;
+      double down = 0;
 
+      std::vector<Ipv4Address> knownBeacons = m_disTable.GetKnownBeacons ();
+      std::vector<Ipv4Address>::const_iterator addr;
+      for (addr = knownBeacons.begin (); addr != knownBeacons.end (); ++addr) {
+        Position beaconPos = m_disTable.GetBeaconPosition(*addr);
+        double hops = m_disTable.GetHopsTo(*addr);
 
+        up += sqrt(pow(m_xPosition-beaconPos.first, 2) + pow(m_yPosition-beaconPos.second, 2));
+        down += hops;
+      }
+
+      m_hopSize = up/down;
+    }
+
+    void
+    RoutingProtocol::Trilateration() {
+      Point points[3];
+      double distances[3];
+
+      uint16_t counter = 0;
+//      *os->GetStream () << "Trilateration Distance entries\n";
+
+      std::vector<Ipv4Address> knownBeacons = m_disTable.GetKnownBeacons ();
+      std::vector<Ipv4Address>::const_iterator addr;
+      for (addr = knownBeacons.begin (); addr != knownBeacons.end (); ++addr) {
+        Position beaconPos = m_disTable.GetBeaconPosition(*addr);
+        if(m_disTable.GetHopSizeOf(*addr) < 0) {
+          continue; // Ignore Beacon with no valid hop size
+        }
+        points[counter] = {beaconPos.first, beaconPos.second};
+        distances[counter] = m_disTable.GetHopSizeOf(*addr) * m_disTable.GetHopsTo(*addr);
+
+        // Beacon IP Address     Distance
+//        *os->GetStream () << addr << "\t" << distances[counter] << std::endl;
+        counter++;
+        if(counter==3) break;
+      }
+
+      if(counter<3) { // We did not get upto 3 beacons to trilaterate
+//        *os->GetStream () << "No enough points for trilateration!" << std::endl;
+        return;
+      }
+      double ex = points[1].x - points[0].x;
+      double ey = points[1].y - points[0].y;
+      double ez = points[1].x * points[1].x - points[0].x * points[0].x +
+                  points[1].y * points[1].y - points[0].y * points[0].y +
+                  distances[0] * distances[0] - distances[1] * distances[1];
+
+      double fx = points[2].x - points[0].x;
+      double fy = points[2].y - points[0].y;
+      double fz = points[2].x * points[2].x - points[0].x * points[0].x +
+                  points[2].y * points[2].y - points[0].y * points[0].y +
+                  distances[0] * distances[0] - distances[2] * distances[2];
+
+      double denominator = 2 * (ex * fy - ey * fx);
+      if (std::abs(denominator) < 1e-6) {
+//        *os->GetStream () << "The points are collinear or too close for trilateration!" << std::endl;
+        return;
+      }
+
+      m_xPosition = (ez * fy - ey * fz) / denominator;
+      m_yPosition = (ex * fz - ez * fx) / denominator;
+    }
+
+    Data
+    RoutingProtocol::ComputeData() const{
+      Point points[3];
+      double distances[3];
+
+      double totalDist = 0.0;
+      double totalLat = 0.0;
+      double totalHops = 0.0;
+
+      Data output;
+
+      uint16_t counter = 0;
+      std::vector<Ipv4Address> knownBeacons = m_disTable.GetKnownBeacons ();
+      std::vector<Ipv4Address>::const_iterator addr;
+      for (addr = knownBeacons.begin (); addr != knownBeacons.end (); ++addr) {
+        Position beaconPos = m_disTable.GetBeaconPosition(*addr);
+        points[counter] = {beaconPos.first, beaconPos.second};
+        distances[counter] = m_disTable.GetHopSizeOf(*addr) * m_disTable.GetHopsTo(*addr);
+
+        totalDist += (double)distances[counter];
+        totalLat +=  m_disTable.LastUpdatedAt(*addr).GetDouble();
+        totalHops += m_disTable.GetHopsTo(*addr);
+        counter++;
+        if(counter==3) break;
+      }
+
+      output.avgDist = totalDist / 3.0;
+      output.avgLat = totalLat / 3.0;
+      output.avgHops = totalHops / 3.0;
+
+      return output;
+
+    }
 
   }
 }

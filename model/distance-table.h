@@ -8,15 +8,6 @@
 #include "ns3/output-stream-wrapper.h"
 
 
-struct Point{
-  double x, y;
-};
-
-struct Data{
-  double avgDist, avgHops, avgLat;
-};
-
-
 namespace ns3
 {
   namespace dvhop
@@ -31,17 +22,21 @@ namespace ns3
       uint16_t  GetHops()     const   { return m_hops;     }  
       Position  GetPosition() const   { return m_pos;      }
       Time      GetTime()     const   { return m_updatedAt;}
+      double    GetHopSize()     const   { return m_hopSize;}
       void SetHops    (uint16_t hops) { m_hops = hops;  }
       void SetPosition(Position p)    { m_pos  = p;     }
       void SetTime    ( Time t )      { m_updatedAt = t;}
+      void SetHopSize    ( double hopSize )      { m_hopSize = hopSize;}
 
     private:
-    // # of hops to beacon
+      // # of hops to beacon
       uint16_t m_hops;
-    // The beacons coordinates (as a pair)
+      // The beacons coordinates (as a pair)
       Position m_pos;
-    // Time of data storage
+      // Time of data storage
       Time     m_updatedAt;
+      // Hop Size
+      double m_hopSize;
     };
 
     std::ostream & operator<< (std::ostream & os, BeaconInfo const &);
@@ -58,8 +53,6 @@ namespace ns3
     public:
       DistanceTable();
 
-      void SetData(Data d){ m_data = d;}
-
       /**
        * @brief GetSize The number of entries stored in this table
        * @return The size
@@ -73,6 +66,14 @@ namespace ns3
        * @return The hop count to the beacon, or 0 if there is no such information
        */
       uint16_t    GetHopsTo(Ipv4Address beacon) const;
+
+
+      /**
+       * @brief GetHopSizeOf Gets the last known hops to a certain beacon
+       * @param beacon The beacon address
+       * @return The hop size of the beacon, or 0 if there is no such information
+       */
+      double    GetHopSizeOf(Ipv4Address beacon) const;
 
       /**
        * @brief GetBeaconPosition Get the ordered pair representing the absolute position of the beacon
@@ -107,39 +108,11 @@ namespace ns3
        * @param xPos X coordinate
        * @param yPos Y coordinate
        */
-      void AddBeacon(Ipv4Address beacon, uint16_t hops, double xPos, double yPos);
-
-      /**
-       * @brief Calculate the Hop size of this an beacon node
-       * @param x X coordinate
-       * @param y Y coordinate
-       */
-      double CalculateHopSize(uint16_t x, uint16_t y) const;
-
-
-      /**
-       * Trilateration Function
-       * @param hopSize
-       * @return
-       */
-      Point Trilateration(Ptr<OutputStreamWrapper> os, std::vector<double> hopSizes) const;
-
-      /**
-       * Data output Function
-       * @param hopSize
-       * @return
-       */
-      Data ComputeData(Ptr<OutputStreamWrapper> os, std::vector<double> hopSizes) const;
+      void AddBeacon(Ipv4Address beacon, uint16_t hops, double hopSize, double xPos, double yPos);
 
     private:
       std::map<Ipv4Address, BeaconInfo>  m_table;
-      //Data on beacons used for trilateration
-      Data    m_data;
     };
-
-
-
-
 
   }
 }

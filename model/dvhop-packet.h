@@ -23,6 +23,10 @@ namespace ns3
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                            Y Position (2)                     |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                            Hop Size (1)                     |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |                            Hop Size (2)                     |
+    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |           Hops                |       Sequence number         |
     +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     |                        Beacon IP address                      |
@@ -34,7 +38,7 @@ namespace ns3
     public:
 
       FloodingHeader();
-      FloodingHeader(double xPos, double yPos, uint16_t seqNo, uint16_t hopCount, Ipv4Address beacon);
+      FloodingHeader(double xPos, double yPos, uint16_t seqNo, uint16_t hopCount, double hopSize, Ipv4Address beacon);
 
       //Serializing and deserializing
       //{
@@ -48,6 +52,7 @@ namespace ns3
 
       //Getters and setters
       void SetHopCount(uint16_t count)     { m_hopCount = count; }
+      void SetHopSize(double hopSize)         { m_hopSize = hopSize;   }
       void SetXPosition(double pos)         { m_xPos = pos;   }
       void SetYPosition(double pos)         { m_yPos = pos;   }
       void SetSequenceNumber(uint16_t sn)  { m_seqNo = sn;   }
@@ -56,6 +61,7 @@ namespace ns3
       double    GetXPosition()        {   return m_xPos;     }
       double    GetYPosition()        {   return m_yPos;     }
       uint16_t GetHopCount()         {   return m_hopCount; }
+      double    GetHopSize()        {   return m_hopSize;     }
       uint16_t GetSequenceNumber()   {   return m_seqNo;    }
       Ipv4Address GetBeaconAddress() {   return m_beaconId; }
 
@@ -65,6 +71,7 @@ namespace ns3
       double       m_yPos;
       uint16_t     m_seqNo;
       uint16_t     m_hopCount;
+      double     m_hopSize;
       Ipv4Address  m_beaconId;
     };
 

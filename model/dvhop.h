@@ -12,11 +12,20 @@
 #include "ns3/timer.h"
 #include "ns3/packet.h"
 #include "ns3/ipv4-header.h"
+#include "ns3/mobility-module.h"
 
 #include "distance-table.h"
 
 #include <map>
 
+
+struct Point{
+  double x, y;
+};
+
+struct Data{
+  double avgDist, avgHops, avgLat;
+};
 
 namespace ns3 {
   namespace dvhop{
@@ -96,7 +105,15 @@ namespace ns3 {
 
       //Table to store the hopCount to each beacon
       DistanceTable  m_disTable;
-      void UpdateHopsTo (Ipv4Address beacon, uint16_t hops, double x, double y);
+      void UpdateHopsTo (Ipv4Address beacon, uint16_t hops, double hopSize, double x, double y);
+      // Helps recalculate hop size of a beacon whenever it receives a braodcast
+      void      RecalculateHopSize();
+      //Trilateration Function
+      void Trilateration() ;
+      //Data output Function
+      Data ComputeData() const;
+
+      void SetData(Data d){ m_data = d;}
 
 
       //Boolean to identify if this node acts as a Beacon
@@ -121,6 +138,8 @@ namespace ns3 {
 
       // Total Time of the simulation to run
       double      m_totalTime;
+      //Data on beacons used for trilateration
+      Data    m_data;
 
 
 

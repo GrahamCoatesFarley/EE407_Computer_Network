@@ -13,7 +13,7 @@ namespace ns3
     {
     }
 
-    FloodingHeader::FloodingHeader(double xPos, double yPos, uint16_t seqNo, uint16_t hopCount, Ipv4Address beacon)
+    FloodingHeader::FloodingHeader(double xPos, double yPos, uint16_t seqNo, uint16_t hopCount, double hopSize, Ipv4Address beacon)
     {
       // Set (X,Y) Coordinate of Node
       m_xPos     = xPos;        
@@ -21,7 +21,9 @@ namespace ns3
       // Set sequence Number of Packet
       m_seqNo    = seqNo;      
       // Set the current hop count
-      m_hopCount = hopCount;   
+      m_hopCount = hopCount;
+      // Set the current hop size
+      m_hopSize = hopSize;
       // Sets the ID of the beacon (node of reference)
       m_beaconId = beacon;     
     }
@@ -44,7 +46,7 @@ namespace ns3
     uint32_t
     FloodingHeader::GetSerializedSize () const
     {
-      return 24; //Total number of bytes when serialized
+      return 32; //Total number of bytes when serialized
     }
 
     void
@@ -61,6 +63,11 @@ namespace ns3
       double y = m_yPos;
       char* const p2 = reinterpret_cast<char*>(&y);
       std::copy(p2, p2+sizeof(uint64_t), reinterpret_cast<char*>(&dst));
+      start.WriteHtonU64 (dst);
+
+      double hopSize = m_hopSize;
+      char *const p3 = reinterpret_cast<char*>(&hopSize);
+      std::copy(p3, p3+sizeof(uint64_t), reinterpret_cast<char*>(&dst));
       start.WriteHtonU64 (dst);
 
       start.WriteU16 (m_seqNo);      
@@ -82,6 +89,9 @@ namespace ns3
       char* const p2 = reinterpret_cast<char*>(&midY);
       std::copy(p2, p2 + sizeof(double), reinterpret_cast<char*>(&m_yPos));
 
+      uint64_t midHopSize = i.ReadNtohU64 ();
+      char* const p3 = reinterpret_cast<char*>(&midHopSize);
+      std::copy(p3, p3 + sizeof(double), reinterpret_cast<char*>(&m_hopSize));
 
 //      std::cout << "Deserializing coordinates ("<<m_xPos <<","<<m_yPos<<")"<<std::endl;
 
@@ -95,12 +105,12 @@ namespace ns3
       return dist;
     }
 
-    // Prints the Beacons IP address and the hopcount and coordinates
+    // Prints the Beacons IP address and the hop count, hop size and coordinates
     void
     FloodingHeader::Print (std::ostream &os) const  
     {
-      //                  "Reference" Node            Current Hop Count          X                  Y
-      os << "\nBeacon: " << m_beaconId << " ,hopCount: " << m_hopCount << ", (" << m_xPos << ", "<< m_yPos<< ")\n";
+      //                  "Reference" Node            Current HopCount   HopSize       X                  Y
+      os << "\nBeacon: " << m_beaconId << " ,hopCount: " << m_hopCount <<" ,hopSize: " << m_hopSize <<", (" << m_xPos << ", "<< m_yPos<< ")\n";
 
     }
 

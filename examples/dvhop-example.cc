@@ -200,7 +200,7 @@ DVHopExample::Report (std::ostream &)
   // Go through all non anchor nodes and calculate the localization error
   double totalLE = 0;
   u_int32_t totalBeacons = 0;
-  u_int32_t tempSize = SIZE;
+  u_int32_t totalTrilateration = 0;
 
   for(uint32_t i=0; i < size; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
@@ -209,6 +209,12 @@ DVHopExample::Report (std::ostream &)
       totalBeacons += 1;
       continue; // Dont calculate beacon error
     }
+
+    if(dvhop->GetXPosition() == -1 && dvhop->GetYPosition() == -1) { //position not calculated by trilateration
+      continue;
+    }
+    totalTrilateration += 1;
+
     Ptr <MobilityModel> mob = nodes.Get(i)->GetObject<MobilityModel>();
 
     double dx = dvhop->GetXPosition() - mob->GetPosition().x;
@@ -217,14 +223,10 @@ DVHopExample::Report (std::ostream &)
 
     std::cout << "Localization Error LE for Node " << i << " = " << LE << std::endl;
 
-    if (!isinf(LE)){
-      totalLE += LE;
-    }
-    else{
-      tempSize -= 1;
-    }
+    totalLE += LE;
   }
-  std::cout << "Average Localization Error LE = "<<(totalLE/(tempSize-totalBeacons)) << std::endl;
+  double averageLE = totalLE / totalTrilateration;
+  std::cout << "Average Localization Error LE of " << totalTrilateration << "/" << (size-totalBeacons) << " = "<<averageLE << std::endl;
 }
 
 void
@@ -308,8 +310,11 @@ DVHopExample::CreateDevices ()
   wifiMac.SetType ("ns3::AdhocWifiMac");
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
+  wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
+  wifiChannel.AddPropagationLoss("ns3::RangePropagationLossModel","MaxRange", DoubleValue (25.0));
   wifiPhy.SetChannel (wifiChannel.Create ());
   WifiHelper wifi = WifiHelper();
+  wifi.SetStandard(WIFI_PHY_STANDARD_80211a);
   wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue ("OfdmRate6Mbps"), "RtsCtsThreshold", UintegerValue (0));
   devices = wifi.Install (wifiPhy, wifiMac, nodes);
 
