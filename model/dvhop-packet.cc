@@ -83,7 +83,7 @@ namespace ns3
       std::copy(p2, p2 + sizeof(double), reinterpret_cast<char*>(&m_yPos));
 
 
-      std::cout << "Deserializing coordinates ("<<m_xPos <<","<<m_yPos<<")"<<std::endl;
+//      std::cout << "Deserializing coordinates ("<<m_xPos <<","<<m_yPos<<")"<<std::endl;
 
       m_seqNo = i.ReadU16 ();
       m_hopCount = i.ReadU16 ();
@@ -95,7 +95,7 @@ namespace ns3
       return dist;
     }
 
-    // Prints the the Beacons IP address and the hopcount and coordinates
+    // Prints the Beacons IP address and the hopcount and coordinates
     void
     FloodingHeader::Print (std::ostream &os) const  
     {

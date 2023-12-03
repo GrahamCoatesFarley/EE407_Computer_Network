@@ -138,7 +138,7 @@ int main (int argc, char **argv)                          // Main loop invitatio
 
 
   if (!test.Configure (argc, argv, seed))                       // Triggers in the event test objects configuration fails 
-    NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Delcares error if the trigger condition is met.
+    NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Declares error if the trigger condition is met.
 
   test.Run (crit);                                   // Initiates running sequence of DVhop simulation
   test.Report (std::cout);
@@ -192,7 +192,7 @@ DVHopExample::Run (bool crit)
 //  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", UintegerValue (1)); // enable rts cts all the time.
   CreateNodes ();                  // Creates nodes for simulation
   CreateDevices ();                // Installs devices on Nodes
-  InstallInternetStack ();         // Establishes Internet topoglogy
+  InstallInternetStack ();         // Establishes Internet topology
 
   if(crit)
     MakeCritical();
@@ -259,13 +259,10 @@ DVHopExample::CreateNodes ()
     }
   // Create static grid
   MobilityHelper mobility;
-  mobility.SetPositionAllocator ("ns3::GridPositionAllocator",
-                                 "MinX", DoubleValue (0.0),        // Minimum Coordinate Grid Positions  (0.0,0.0)
-                                 "MinY", DoubleValue (0.0),
-                                 "DeltaX", DoubleValue (step),      // Delta (change in) Coordinate Grid Positions (step, 0)
-                                 "DeltaY", DoubleValue (step),
-                                 "GridWidth", UintegerValue (3),
-                                 "LayoutType", StringValue ("RowFirst"));
+  mobility.SetPositionAllocator ("ns3::RandomDiscPositionAllocator",
+                                 "X", StringValue ("100"),
+                                 "Y", StringValue ("100"),
+                                 "Rho", StringValue ("ns3::UniformRandomVariable[Min=0|Max=100]"));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility.Install (nodes);
 }

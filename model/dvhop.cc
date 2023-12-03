@@ -491,7 +491,7 @@ namespace ns3 {
                                          m_seqNo++,                   //Sequence Numbr
                                          0,                           //Hop Count
                                          iface.GetLocal ());          //Beacon Address
-              std::cout <<__FILE__<< __LINE__ << helloHeader << std::endl;
+//              std::cout <<__FILE__<< __LINE__ << helloHeader << std::endl;
 
               NS_LOG_DEBUG (iface.GetLocal ()<< " Sending Hello...");
               Ptr<Packet> packet = Create<Packet>();
