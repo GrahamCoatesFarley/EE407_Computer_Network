@@ -152,11 +152,14 @@ DVHopExample::Report (std::ostream &)
 {
   // Go through all non anchor nodes and calculate the localization error
   double totalLE = 0;
+  u_int32_t totalBeacons = 0;
+  u_int32_t tempSize = SIZE;
 
   for(uint32_t i=0; i < SIZE; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
     if(dvhop->IsBeacon()) {
+      totalBeacons += 1;
       continue; // Dont calculate beacon error
     }
     Ptr <MobilityModel> mob = nodes.Get(i)->GetObject<MobilityModel>();
@@ -167,9 +170,14 @@ DVHopExample::Report (std::ostream &)
 
     std::cout << "Localization Error LE for Node " << i << " = " << LE << std::endl;
 
-    totalLE += LE;
+    if (!isinf(LE)){
+      totalLE += LE;
+    }
+    else{
+      tempSize -= 1;
+    }
   }
-  std::cout << "Average Localization Error LE = "<<(totalLE/(SIZE-3)) << std::endl;
+  std::cout << "Average Localization Error LE = "<<(totalLE/(tempSize-totalBeacons)) << std::endl;
 }
 
 void
