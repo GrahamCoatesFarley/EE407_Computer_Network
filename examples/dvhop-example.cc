@@ -9,7 +9,7 @@
       Graham Coates-Farely    -- Team Lead
       Mikaila Flavell
       Ahmad Suleiman
-      Peter Russell
+      Russell Peter 
       Vincent Cifone
       Jashitha Boyapati
       Bhavani Bandi
@@ -27,6 +27,7 @@
 #include "ns3/netanim-module.h"
 #include <iostream>
 #include <cmath>
+#include "ns3/flow-monitor-helper.h"
 
 using namespace ns3;
 
@@ -42,13 +43,19 @@ using namespace ns3;
 class DVHopExample
 {
 public:
+  /// Default constructor 
   DVHopExample ();
-  /// Configure script parameters, \return true on successful configuration
-  bool Configure (int argc, char **argv);
-  /// Run simulation
-  void Run ();
+  /// NonDefault Constructor with time of simulation passed
+  DVHopExample (double time);
+  /// Configure script parameters, \return true on successful configuration, passed seed for configuration
+  bool Configure (int argc, char **argv, u_int32_t seed);
+  /// Run simulation, boolean to determine ideal/critical scenario
+  void Run (bool crit);
   /// Report results
   void Report (std::ostream & os);
+  /// Sets the simulation time (primary use in critical condition but does not effect ideal)
+  void SetSimTime ();
+
 
 private:
   ///\name parameters
@@ -78,22 +85,64 @@ private:
   void InstallInternetStack ();
   void InstallApplications ();
   void CreateBeacons();
+  void MakeCritical();
 };
 
 //----------------------------------------------------------------------------------------------------------------------------------
-// Constants for easze of size/ step adjustment
-const u_int32_t SIZE = 18;
-const uint32_t STEP = 40;
+
+// Constants for ease of size/ step adjustment
+const u_int32_t SIZE = 20;               // Number of nodes
+const u_int32_t STEP = 5;              // Step size between nodes
+const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
+const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
+const double SENT = -1.0;               // Sentinel Value
 
 int main (int argc, char **argv)                          // Main loop invitation 
 {
+  char ansA, ansB;
+  bool crit = false;
+  double time = 0.0;
+  u_int32_t seed = 0;
+
+  // User determination of whether the simulation is critical or ideal
+  std::cout << "\nShould this be a critical simulation? (Y or N)\n";
+  std::cin.get(ansA);
+  ansA = toupper(ansA);
+
+  if(ansA == 'Y')
+    crit = true;
+
+  // User determination of simulation time
+  std::cout << "\nPlease input simulation time-span in seconds. For default time (10s) input -1\n";
+  std::cin >> time;
+
+  // User determination of execution seed
+  std::cout << "\nShould the simulation run on a default or random seed? (R for Random, anything else for Default)\n";
+  std::cin >> ansB;
+  ansB = toupper(ansB);
+
+  if (ansB == 'R')
+  {
+    srand(time * DEFAULT_SEED);
+    seed = rand()%99999 + 10000;
+  }
+  else
+    seed = DEFAULT_SEED;
+
+  std::cout << "\n\n" << seed <<"\n\n";
+
   DVHopExample test;                                      // Creates DVHop 
-  if (!test.Configure (argc, argv))                       // Triggers in the event test objects configuration fails 
+  // Sets new simulation time if requested other than default (input not SENT)
+  if(time != SENT)
+    test = DVHopExample(abs(time)); // Ensures a non negative simulation time
+
+
+  if (!test.Configure (argc, argv, seed))                       // Triggers in the event test objects configuration fails 
     NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Delcares error if the trigger condition is met.
 
-  test.Run ();                                            // Initiates running sequence of DVhop simulation
+  test.Run (crit);                                   // Initiates running sequence of DVhop simulation
   test.Report (std::cout);
-  Simulator::Destroy ();    // Recycles simulation resources post execution
+  Simulator::Destroy ();                                  // Recycles simulation resources post execution
   return 0;                                               // Return successful execution 
 }
 
@@ -101,19 +150,30 @@ int main (int argc, char **argv)                          // Main loop invitatio
 DVHopExample::DVHopExample () :
   size (SIZE),              			// Sets number of nodes
   step (STEP),             // Set step size between nodes
-  totalTime (15),         // Sets simulation run time
+  totalTime (DEFAULT_TIME),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
   printRoutes (true)      // Enables route printing
 {
 }
 
+DVHopExample::DVHopExample (double time) :
+  size (SIZE),              			// Sets number of nodes
+  step (STEP),             // Set step size between nodes
+  totalTime (time),         // Sets simulation run time
+  pcap (true),            // Enables pcap generation  
+  printRoutes (true)      // Enables route printing
+{
+}
+
+
 bool
-DVHopExample::Configure (int argc, char **argv)
+DVHopExample::Configure (int argc, char **argv, u_int32_t seed)
 {
   // Enable DVHop logs by default. Comment this if too noisy
-  LogComponentEnable("DVHopRoutingProtocol", LOG_LEVEL_ALL);
-
-  SeedManager::SetSeed (12345);
+  //LogComponentEnable("DVHopRoutingProtocol", LOG_LEVEL_ALL);
+  
+  SeedManager::SetSeed (seed);
+  
   CommandLine cmd;
 
   cmd.AddValue ("pcap", "Write PCAP traces.", pcap);
@@ -127,24 +187,28 @@ DVHopExample::Configure (int argc, char **argv)
 }
 
 void
-DVHopExample::Run ()
+DVHopExample::Run (bool crit)
 {
 //  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", UintegerValue (1)); // enable rts cts all the time.
   CreateNodes ();                  // Creates nodes for simulation
   CreateDevices ();                // Installs devices on Nodes
   InstallInternetStack ();         // Establishes Internet topoglogy
 
+  if(crit)
+    MakeCritical();
+
   CreateBeacons();                  // Converts a number of nodes to beacons
+  SetSimTime();
 
   std::cout << "Starting simulation for " << totalTime << " s ...\n";
 
   Simulator::Stop (Seconds (totalTime));      // Establishes the Stop time for the simulation
   
+  
   AnimationInterface anim("anim_ideal.xml");   // Establishes the file for animation generation of simulation    
 
   Simulator::Run ();        // Runs the sim
 }
-
 
 // TODO: Report simulation result 
 void
@@ -155,7 +219,7 @@ DVHopExample::Report (std::ostream &)
   u_int32_t totalBeacons = 0;
   u_int32_t tempSize = SIZE;
 
-  for(uint32_t i=0; i < SIZE; i++) {
+  for(uint32_t i=0; i < size; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
     if(dvhop->IsBeacon()) {
@@ -207,16 +271,25 @@ DVHopExample::CreateNodes ()
 }
 
 void
+DVHopExample::MakeCritical ()
+{
+  for(uint32_t i = 0; i < size; ++i)
+  {
+    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (i)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  	Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
+  	dvhop->SetIsCritical (true);
+
+  }
+}
+
+void
 DVHopExample::CreateBeacons ()
 {
   // This is Currently hardcoded to create beacons, can use rand() between 0 and maxNode 
   // a number of times, maybe 10-15% of the max nodes as beacons?
 
-  //for(uint32_t i = size; i < (size +sizeB); i++)
- 
-  uint32_t beaconCount = 6;
-
-  uint32_t beacons[beaconCount] = {0, 5, 7, 9, 11, 13}; // Node ID of our beacons
+  uint32_t beaconCount = 3;
+  uint32_t beacons[3] = {(uint32_t)((double)size * 0.12), (uint32_t)((double)size * 0.48), (uint32_t)((double)size * 0.82)}; // Node ID of our beacons
 
   for(uint32_t i=0; i < beaconCount; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(beacons[i])->GetObject<Ipv4>()->GetRoutingProtocol();
@@ -241,6 +314,7 @@ DVHopExample::CreateDevices ()
   WifiHelper wifi = WifiHelper();
   wifi.SetRemoteStationManager ("ns3::ConstantRateWifiManager", "DataMode", StringValue ("OfdmRate6Mbps"), "RtsCtsThreshold", UintegerValue (0));
   devices = wifi.Install (wifiPhy, wifiMac, nodes);
+
 
   if (pcap)
     {
@@ -268,4 +342,16 @@ DVHopExample::InstallInternetStack ()
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("dvhop.routes", std::ios::out);
       dvhop.PrintRoutingTableAllAt (Seconds (8), routingStream);
     }
+}
+
+void
+DVHopExample::SetSimTime ()
+{
+  for(uint32_t i = 0; i < size; ++i)
+  {
+    Ptr<Ipv4RoutingProtocol> proto = nodes.Get (i)->GetObject<Ipv4>()->GetRoutingProtocol ();
+  	Ptr<dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol> (proto);
+  	dvhop->SetSimulationTime (totalTime);
+
+  }
 }
