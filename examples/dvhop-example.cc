@@ -36,8 +36,6 @@ using namespace ns3;
  *
  * This script creates 1-dimensional grid topology and then ping last node from the first one:
  *
- * [10.0.0.1] <-- step --> [10.0.0.2] <-- step --> [10.0.0.3] <-- step --> [10.0.0.4]
- *
  *
  */
 class DVHopExample
@@ -62,8 +60,6 @@ private:
   //\{
   /// Number of nodes
   uint32_t size;
-  /// Distance between nodes, meters
-  double step;
   /// Simulation time, seconds
   double totalTime;
   /// Write per-device PCAP traces if true
@@ -90,10 +86,9 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------------------
 
-// Constants for ease of size/ step adjustment
-const u_int32_t SIZE = 20;               // Number of nodes
-const u_int32_t STEP = 5;              // Step size between nodes
-const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
+// Constants for ease of size
+const u_int32_t SIZE = 200;               // Number of nodes
+const u_int32_t DEFAULT_TIME = 50;      // Default simulation time
 const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
 const double SENT = -1.0;               // Sentinel Value
 
@@ -149,7 +144,6 @@ int main (int argc, char **argv)                          // Main loop invitatio
 //-----------------------------------------------------------------------------
 DVHopExample::DVHopExample () :
   size (SIZE),              			// Sets number of nodes
-  step (STEP),             // Set step size between nodes
   totalTime (DEFAULT_TIME),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
   printRoutes (true)      // Enables route printing
@@ -158,9 +152,8 @@ DVHopExample::DVHopExample () :
 
 DVHopExample::DVHopExample (double time) :
   size (SIZE),              			// Sets number of nodes
-  step (STEP),             // Set step size between nodes
   totalTime (time),         // Sets simulation run time
-  pcap (true),            // Enables pcap generation  
+  pcap (false),            // Enables pcap generation
   printRoutes (true)      // Enables route printing
 {
 }
@@ -180,7 +173,6 @@ DVHopExample::Configure (int argc, char **argv, u_int32_t seed)
   cmd.AddValue ("printRoutes", "Print routing table dumps.", printRoutes);
   cmd.AddValue ("size", "Number of nodes.", size);
   cmd.AddValue ("time", "Simulation time, s.", totalTime);
-  cmd.AddValue ("step", "Grid step, m", step);
 
   cmd.Parse (argc, argv);
   return true;
@@ -210,7 +202,6 @@ DVHopExample::Run (bool crit)
   Simulator::Run ();        // Runs the sim
 }
 
-// TODO: Report simulation result 
 void
 DVHopExample::Report (std::ostream &)                            
 {
@@ -247,7 +238,7 @@ DVHopExample::Report (std::ostream &)
 void
 DVHopExample::CreateNodes ()
 {
-  std::cout << "Creating " << (unsigned)size << " nodes " << step << " m apart.\n";
+  std::cout << "Creating RandomRectangle Nodes" << (unsigned)size << " nodes\n";
   nodes.Create (size);	// Create all nodes + beacons
   // Name nodes
   for (uint32_t i = 0; i < size; ++i)
@@ -259,10 +250,9 @@ DVHopExample::CreateNodes ()
     }
   // Create static grid
   MobilityHelper mobility;
-  mobility.SetPositionAllocator ("ns3::RandomDiscPositionAllocator",
-                                 "X", StringValue ("100"),
-                                 "Y", StringValue ("100"),
-                                 "Rho", StringValue ("ns3::UniformRandomVariable[Min=0|Max=100]"));
+  mobility.SetPositionAllocator ("ns3::RandomRectanglePositionAllocator",
+                                 "X", StringValue ("ns3::UniformRandomVariable[Min=0|Max=100]"),
+                                 "Y", StringValue ("ns3::UniformRandomVariable[Min=0|Max=100]"));
   mobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
   mobility.Install (nodes);
 }
