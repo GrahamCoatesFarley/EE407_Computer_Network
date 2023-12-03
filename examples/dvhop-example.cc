@@ -82,7 +82,7 @@ private:
 
 //----------------------------------------------------------------------------------------------------------------------------------
 // Constants for easze of size/ step adjustment
-const u_int32_t SIZE = 9;
+const u_int32_t SIZE = 18;
 const uint32_t STEP = 40;
 
 int main (int argc, char **argv)                          // Main loop invitation 
@@ -101,7 +101,7 @@ int main (int argc, char **argv)                          // Main loop invitatio
 DVHopExample::DVHopExample () :
   size (SIZE),              			// Sets number of nodes
   step (STEP),             // Set step size between nodes
-  totalTime (10),         // Sets simulation run time
+  totalTime (15),         // Sets simulation run time
   pcap (true),            // Enables pcap generation  
   printRoutes (true)      // Enables route printing
 {
@@ -205,10 +205,12 @@ DVHopExample::CreateBeacons ()
   // a number of times, maybe 10-15% of the max nodes as beacons?
 
   //for(uint32_t i = size; i < (size +sizeB); i++)
+ 
+  uint32_t beaconCount = 6;
 
-  uint32_t beacons[3] = {0, 5, 7}; // Node ID of our beacons
+  uint32_t beacons[beaconCount] = {0, 5, 7, 9, 11, 13}; // Node ID of our beacons
 
-  for(uint32_t i=0; i < 3; i++) {
+  for(uint32_t i=0; i < beaconCount; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(beacons[i])->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
     dvhop->SetIsBeacon(true);

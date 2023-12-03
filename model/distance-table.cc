@@ -143,6 +143,7 @@ namespace ns3
         // Beacon IP Address     Distance
         *os->GetStream () << j->first << "\t" << distances[counter] << std::endl;
         counter++;
+	if(counter==3) break;
       }
 
       Point location;
@@ -170,6 +171,41 @@ namespace ns3
 
     }
 
+    Data
+    DistanceTable::ComputeData(Ptr<OutputStreamWrapper> os, std::vector<double> hopSizes) const{
+      Point points[3];
+      double distances[3];
+
+      double totalDist = 0.0;
+      double totalLat = 0.0;
+      double totalHops = 0.0;
+
+      Data output;
+
+      uint16_t counter = 0;
+      *os->GetStream () << "Distance entries\n";
+      for(std::map<Ipv4Address,BeaconInfo>::const_iterator j = m_table.begin (); j != m_table.end (); ++j)
+        {
+          points[counter] = {j->second.GetPosition().first, j->second.GetPosition().second};
+          distances[counter] = hopSizes[counter] * j->second.GetHops();
+
+          totalDist += (double)distances[counter];
+          totalLat += j->second.GetTime().GetDouble();
+          totalHops += j->second.GetHops();
+
+          // Beacon IP Address     Distance
+          *os->GetStream () << j->first << "\t" << distances[counter] << std::endl;
+          counter++;
+          if(counter==3) break;
+        }
+
+      output.avgDist = totalDist / 3.0;
+      output.avgLat = totalLat / 3.0;
+      output.avgHops = totalHops / 3.0;
+
+      return output;
+
+  }
   }
 }
 

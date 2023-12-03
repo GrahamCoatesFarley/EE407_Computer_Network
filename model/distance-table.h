@@ -11,6 +11,12 @@
 struct Point{
   double x, y;
 };
+
+struct Data{
+  double avgDist, avgHops, avgLat;
+};
+
+
 namespace ns3
 {
   namespace dvhop
@@ -51,6 +57,8 @@ namespace ns3
     {
     public:
       DistanceTable();
+
+      void SetData(Data d){ m_data = d;}
 
       /**
        * @brief GetSize The number of entries stored in this table
@@ -116,8 +124,17 @@ namespace ns3
        */
       Point Trilateration(Ptr<OutputStreamWrapper> os, std::vector<double> hopSizes) const;
 
+      /**
+       * Data output Function
+       * @param hopSize
+       * @return
+       */
+      Data ComputeData(Ptr<OutputStreamWrapper> os, std::vector<double> hopSizes) const;
+
     private:
       std::map<Ipv4Address, BeaconInfo>  m_table;
+      //Data on beacons used for trilateration
+      Data    m_data;
     };
 
 

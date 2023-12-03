@@ -371,12 +371,18 @@ namespace ns3 {
         }
 
         Point location = m_disTable.Trilateration(stream, hopSizes);
+        Data info = m_disTable.ComputeData(stream, hopSizes);
 
         Ptr <Ipv4RoutingProtocol> proto = node->GetObject<Ipv4>()->GetRoutingProtocol();
         Ptr <dvhop::RoutingProtocol> nodeDvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
         nodeDvhop->SetPosition(location.x, location.y);
+        //nodeDvhop->SetData(info)
 
         *stream->GetStream() << "Estimated Position: (" << location.x << ", " << location.y << ")" << std::endl;
+
+        *stream->GetStream() << "Avgerage distance from beacons: " << info.avgDist << std::endl;
+        *stream->GetStream() << "Avgerage number of hops from beacons: " << info.avgHops<< std::endl;
+        *stream->GetStream() << "Avgerage latency from beacons: " << info.avgLat<< std::endl;
       }
     }
 
