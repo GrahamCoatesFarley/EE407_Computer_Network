@@ -109,7 +109,7 @@ namespace ns3 {
       DistanceTable  m_disTable;
       void UpdateHopsTo (Ipv4Address beacon, uint16_t hops, double hopSize, double x, double y);
       // Helps recalculate hop size of a beacon whenever it receives a braodcast
-      void      RecalculateHopSize();
+      void RecalculateHopSize();
       //Trilateration Function
       void Trilateration() ;
       //Data output Function
