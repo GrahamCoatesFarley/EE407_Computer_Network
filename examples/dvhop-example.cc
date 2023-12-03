@@ -45,8 +45,8 @@ public:
   DVHopExample ();
   /// NonDefault Constructor with time of simulation passed
   DVHopExample (double time);
-  /// Configure script parameters, \return true on successful configuration, passed seed for configuration
-  bool Configure (int argc, char **argv, u_int32_t seed);
+  /// Configure script parameters, \return true on successful configuration
+  bool Configure (int argc, char **argv);
   /// Run simulation, boolean to determine ideal/critical scenario
   void Run (bool crit);
   /// Report results
@@ -116,28 +116,13 @@ int main (int argc, char **argv)                          // Main loop invitatio
   std::cout << "\nPlease input simulation time-span in seconds. For default time ("<< DEFAULT_TIME <<"s) input -1\n";
   std::cin >> time;
 
-  // User determination of execution seed
-  std::cout << "\nShould the simulation run on a default or random seed? (R for Random, anything else for Default)\n";
-  std::cin >> ansB;
-  ansB = toupper(ansB);
-
-  if (ansB == 'R')
-  {
-    srand(time * DEFAULT_SEED);
-    seed = rand()%99999 + 10000;
-  }
-  else
-    seed = DEFAULT_SEED;
-
-  std::cout << "\n\n" << seed <<"\n\n";
-
   DVHopExample test;                                      // Creates DVHop 
   // Sets new simulation time if requested other than default (input not SENT)
   if(time != SENT)
     test = DVHopExample(abs(time)); // Ensures a non negative simulation time
 
 
-  if (!test.Configure (argc, argv, seed))                       // Triggers in the event test objects configuration fails 
+  if (!test.Configure (argc, argv))                       // Triggers in the event test objects configuration fails
     NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Declares error if the trigger condition is met.
 
   test.Run (crit);                                   // Initiates running sequence of DVhop simulation
@@ -167,12 +152,12 @@ DVHopExample::DVHopExample (double time) :
 
 
 bool
-DVHopExample::Configure (int argc, char **argv, u_int32_t seed)
+DVHopExample::Configure (int argc, char **argv)
 {
   // Enable DVHop logs by default. Comment this if too noisy
   //LogComponentEnable("DVHopRoutingProtocol", LOG_LEVEL_ALL);
   
-  SeedManager::SetSeed (seed);
+  SeedManager::SetSeed (DEFAULT_SEED);
   
   CommandLine cmd;
 
@@ -282,8 +267,8 @@ DVHopExample::CreateBeacons ()
 {
   // Uses beacon percentage to determine the number of beacons and then randomly selecting them
   uint32_t beaconCount = (beaconPercentage * size) / 100;
-//  uint32_t beacons[3] = {(uint32_t)((double)size * 0.12), (uint32_t)((double)size * 0.48), (uint32_t)((double)size * 0.82)}; // Node ID of our beacons
 
+  // Selecting the first beaconCount in nodes since position is already random
   for(uint32_t i=0; i < beaconCount; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
