@@ -238,7 +238,7 @@ DVHopExample::Report (std::ostream &)
 void
 DVHopExample::CreateNodes ()
 {
-  std::cout << "Creating RandomRectangle Nodes" << (unsigned)size << " nodes\n";
+  std::cout << "Creating RandomRectangle Nodes" << (unsigned)size << " nodes within 100m by 100m\n";
   nodes.Create (size);	// Create all nodes + beacons
   // Name nodes
   for (uint32_t i = 0; i < size; ++i)
@@ -327,7 +327,7 @@ DVHopExample::InstallInternetStack ()
   if (printRoutes)
     {
       Ptr<OutputStreamWrapper> routingStream = Create<OutputStreamWrapper> ("dvhop.routes", std::ios::out);
-      dvhop.PrintRoutingTableAllAt (Seconds (8), routingStream);
+      dvhop.PrintRoutingTableAllAt (Seconds (totalTime), routingStream);
     }
 }
 
