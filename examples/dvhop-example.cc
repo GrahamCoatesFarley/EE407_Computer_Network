@@ -50,7 +50,7 @@ public:
   /// Run simulation, boolean to determine ideal/critical scenario
   void Run (bool crit);
   /// Report results
-  void Report (std::ostream & os);
+  void Report () const;
   /// Sets the simulation time (primary use in critical condition but does not effect ideal)
   void SetSimTime ();
   /// Sets the simulation time (primary use in critical condition but does not effect ideal)
@@ -96,6 +96,7 @@ const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
 const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
 const double SENT = -1.0;               // Sentinel Value
 const u_int32_t DEFAULT_BEACON_PERCENTAGE = 25;      // Default percentage of beacons 25%
+const u_int32_t DEFAULT_REPORT_INTERVAL = 1;      // Report interval
 
 int main (int argc, char **argv)                          // Main loop invitation 
 {
@@ -125,7 +126,7 @@ int main (int argc, char **argv)                          // Main loop invitatio
     NS_FATAL_ERROR ("Configuration failed. Aborted.");    // Declares error if the trigger condition is met.
 
   test.Run (crit);                                   // Initiates running sequence of DVhop simulation
-  test.Report (std::cout);
+
   Simulator::Destroy ();                                  // Recycles simulation resources post execution
   return 0;                                               // Return successful execution 
 }
@@ -187,24 +188,32 @@ DVHopExample::Run (bool crit)
   std::cout << "Starting simulation for " << totalTime << " s ...\n";
 
   Simulator::Stop (Seconds (totalTime));      // Establishes the Stop time for the simulation
-  
-  
+
+
+  Simulator::Schedule(Seconds(DEFAULT_REPORT_INTERVAL), &DVHopExample::Report, this);
   AnimationInterface anim("anim_ideal.xml");   // Establishes the file for animation generation of simulation    
 
   Simulator::Run ();        // Runs the sim
+
 }
 
 void
-DVHopExample::Report (std::ostream &)                            
+DVHopExample::Report () const
 {
   // Go through all non anchor nodes and calculate the localization error
   double totalLE = 0;
   u_int32_t totalBeacons = 0;
   u_int32_t totalTrilateration = 0;
 
+  u_int32_t totalNodesAlive = 0;
+
   for(uint32_t i=0; i < size; i++) {
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
+
+    if(dvhop->IsAlive()) {
+      totalNodesAlive += 1;
+    }
     if(dvhop->IsBeacon()) {
       totalBeacons += 1;
       continue; // Dont calculate beacon error
@@ -227,6 +236,8 @@ DVHopExample::Report (std::ostream &)
   }
   double averageLE = totalLE / totalTrilateration;
   std::cout << "Average Localization Error LE of " << totalTrilateration << "/" << (size-totalBeacons) << " = "<<averageLE << std::endl;
+  std::cout << "Nodes Alive: " << totalNodesAlive << "/" << size << std::endl;
+  Simulator::Schedule(Seconds(DEFAULT_REPORT_INTERVAL), &DVHopExample::Report, this);
 }
 
 void

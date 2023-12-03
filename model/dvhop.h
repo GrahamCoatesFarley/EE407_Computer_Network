@@ -73,6 +73,8 @@ namespace ns3 {
       double GetYPosition()               { return m_yPosition;}                       
       // Predicates on if a node is a beacon
       bool  IsBeacon()                   { return m_isBeacon;}                            // Determines in the node is flagged as a beacon (knows its location)
+      // Predicates on if a node is a beacon
+      bool  IsAlive()                   { return m_isAlive;}
       // Returns the hop size of the beacon
       double GetHopSize()               { return m_hopSize;}
 
