@@ -200,6 +200,7 @@ DVHopExample::Run (bool crit)
 void
 DVHopExample::Report () const
 {
+  std::cout<< "Report at Time: " << Simulator::Now()<< std::endl;
   // Go through all non anchor nodes and calculate the localization error
   double totalLE = 0;
   u_int32_t totalBeacons = 0;

@@ -593,17 +593,18 @@ namespace ns3 {
     RoutingProtocol::UpdateHopsTo (Ipv4Address beacon, uint16_t newHops, double newHopSize, double x, double y)
     {
       uint16_t oldHops = m_disTable.GetHopsTo (beacon);
+      double oldHopSize = m_disTable.GetHopSizeOf (beacon);
       if (m_ipv4->GetInterfaceForAddress (beacon) >= 0){
           NS_LOG_DEBUG ("Local Address, not updating in table");
           return;
         }
 
       if( oldHops > newHops || oldHops == 0) {//Update only when a shortest path is found
-        m_disTable.AddBeacon(beacon, newHops, newHopSize, x, y);
+        m_disTable.AddBeacon(beacon, newHops, newHopSize > 0? newHopSize:oldHopSize, x, y);
 
         if(m_isBeacon) { // Recalculate hop sizes to other beacons
           RecalculateHopSize();
-        }else if( newHopSize > 0 ) {
+        }else if( newHopSize > 0 || oldHopSize > 0 ) {
           Trilateration();
         }
       } else if( newHopSize > 0 && !m_isBeacon) {//Also update hop size if its available only for regular nodes, but hop counts remains
@@ -646,6 +647,9 @@ namespace ns3 {
         Position beaconPos = m_disTable.GetBeaconPosition(*addr);
         if(m_disTable.GetHopSizeOf(*addr) < 0) {
           continue; // Ignore Beacon with no valid hop size
+        }
+        if(m_disTable.GetHopsTo(*addr) > 2) {
+          continue; // dont select beacons with more than 2 hops
         }
         points[counter] = {beaconPos.first, beaconPos.second};
         distances[counter] = m_disTable.GetHopSizeOf(*addr) * m_disTable.GetHopsTo(*addr);
