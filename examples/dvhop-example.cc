@@ -99,10 +99,9 @@ const u_int32_t DEFAULT_BEACON_PERCENTAGE = 25;      // Default percentage of be
 
 int main (int argc, char **argv)                          // Main loop invitation 
 {
-  char ansA, ansB;
+  char ansA;
   bool crit = false;
   double time = 0.0;
-  u_int32_t seed = 0;
 
   // User determination of whether the simulation is critical or ideal
   std::cout << "\nShould this be a critical simulation? (Y or N)\n";
