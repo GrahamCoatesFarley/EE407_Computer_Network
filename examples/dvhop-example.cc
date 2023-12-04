@@ -27,7 +27,6 @@
 #include "ns3/netanim-module.h"
 #include <iostream>
 #include <cmath>
-#include "ns3/flow-monitor-helper.h"
 
 using namespace ns3;
 
@@ -53,7 +52,7 @@ public:
   void Report (Ptr<OutputStreamWrapper> stream) const;
   /// Sets the simulation time (primary use in critical condition but does not effect ideal)
   void SetSimTime ();
-  /// Sets the simulation time (primary use in critical condition but does not effect ideal)
+  /// Prints a nodes coordinate information to an output file
   void PrintNodes ();
 
 
@@ -83,7 +82,6 @@ private:
   void CreateNodes ();
   void CreateDevices ();
   void InstallInternetStack ();
-  void InstallApplications ();
   void CreateBeacons();
   void MakeCritical();
 };
