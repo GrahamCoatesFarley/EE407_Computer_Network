@@ -421,7 +421,7 @@ namespace ns3 {
           //std::cout << std::endl<< chance << std::endl<< std::endl;   <-- Output was used to allow for testing of death chance
           //td::cout << std::endl<< currTime << "Time of Possible Death" << std::endl<< std::endl;
 
-          // Nodes have a higher chance of dying at later times in the simulation
+          // Nodes have a lower chance of dying at later times in the simulation
           if(((currTime > 0.0 && currTime < (m_totalTime * 0.05)) && chance < 20) || 
           ((currTime > (m_totalTime * 0.15) && currTime < (m_totalTime * 0.35)) && chance < 10) || 
           (((currTime > (m_totalTime * 0.45) && currTime < (m_totalTime)) && chance < 5)))
@@ -557,7 +557,7 @@ namespace ns3 {
         //std::cout << std::endl<< chance << std::endl<< std::endl;   <-- Output was used to allow for testing of death chance
         //td::cout << std::endl<< currTime << "Time of Possible Death" << std::endl<< std::endl;
 
-          // Nodes have a higher chance of dying at later times in the simulation
+          // Nodes have a lower chance of dying at later times in the simulation
           if(((currTime > 0.0 && currTime < (m_totalTime * 0.05)) && chance < 20) || 
           ((currTime > (m_totalTime * 0.15) && currTime < (m_totalTime * 0.35)) && chance < 10) || 
           (((currTime > (m_totalTime * 0.45) && currTime < (m_totalTime)) && chance < 5)))
