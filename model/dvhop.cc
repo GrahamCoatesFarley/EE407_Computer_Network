@@ -410,27 +410,8 @@ namespace ns3 {
 
        if(m_isCrit)
       {
-        srand(m_totalTime * m_hopSize);
-        
-        if(m_isAlive){
+        if(m_isAlive)
           SendHello ();   
-
-          // Determine if the Node dies
-          double currTime = (Simulator::Now()).GetSeconds();
-          u_int32_t chance = (rand()%100) + 1;
-          //std::cout << std::endl<< chance << std::endl<< std::endl;   <-- Output was used to allow for testing of death chance
-          //td::cout << std::endl<< currTime << "Time of Possible Death" << std::endl<< std::endl;
-
-          // Nodes have a lower chance of dying at later times in the simulation
-          if(((currTime > 0.0 && currTime < (m_totalTime * 0.05)) && chance < 20) || 
-          ((currTime > (m_totalTime * 0.15) && currTime < (m_totalTime * 0.35)) && chance < 10) || 
-          (((currTime > (m_totalTime * 0.45) && currTime < (m_totalTime)) && chance < 5)))
-          {
-            m_isAlive = false;
-            NS_LOG_LOGIC ("\n\nA Node has Died at time: " << currTime << std::endl); 
-          }
-
-        }
         else
           NS_LOG_LOGIC ("\n\n@" << Simulator::Now() << " , Hello fails.\n\n");
       }
@@ -545,7 +526,7 @@ namespace ns3 {
     
       if(m_isCrit)
       {
-        srand(m_totalTime * m_hopSize);
+        srand(m_totalTime + m_hopSize);
         
         if(m_isAlive){
 
