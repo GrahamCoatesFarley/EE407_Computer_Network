@@ -50,7 +50,7 @@ public:
   /// Run simulation, boolean to determine ideal/critical scenario
   void Run (bool crit);
   /// Report results
-  void Report () const;
+  void Report (Ptr<OutputStreamWrapper> stream) const;
   /// Sets the simulation time (primary use in critical condition but does not effect ideal)
   void SetSimTime ();
   /// Sets the simulation time (primary use in critical condition but does not effect ideal)
@@ -95,7 +95,7 @@ const u_int32_t SIZE = 100;               // Number of nodes
 const u_int32_t DEFAULT_TIME = 10;      // Default simulation time
 const u_int32_t DEFAULT_SEED = 12345;   // Default simulation seed
 const double SENT = -1.0;               // Sentinel Value
-const u_int32_t DEFAULT_BEACON_PERCENTAGE = 25;      // Default percentage of beacons 25%
+const u_int32_t DEFAULT_BEACON_PERCENTAGE = 15;      // Default percentage of beacons 15%
 const u_int32_t DEFAULT_REPORT_INTERVAL = 1;      // Report interval
 
 int main (int argc, char **argv)                          // Main loop invitation 
@@ -190,7 +190,10 @@ DVHopExample::Run (bool crit)
   Simulator::Stop (Seconds (totalTime));      // Establishes the Stop time for the simulation
 
 
-  Simulator::Schedule(Seconds(DEFAULT_REPORT_INTERVAL), &DVHopExample::Report, this);
+  Ptr<OutputStreamWrapper> reportStream = Create<OutputStreamWrapper>("dvhop_report.csv", std::ios::out);
+  Simulator::Schedule(Seconds(DEFAULT_REPORT_INTERVAL), &DVHopExample::Report, this, reportStream);
+
+
   AnimationInterface anim("anim_ideal.xml");   // Establishes the file for animation generation of simulation    
 
   Simulator::Run ();        // Runs the sim
@@ -198,7 +201,7 @@ DVHopExample::Run (bool crit)
 }
 
 void
-DVHopExample::Report () const
+DVHopExample::Report (Ptr<OutputStreamWrapper> stream) const
 {
   std::cout<< "--------------------------------------------------------------" << std::endl;
   std::cout<< "Report at Time: " << Simulator::Now().GetSeconds()<< std::endl;
@@ -213,12 +216,16 @@ DVHopExample::Report () const
     Ptr <Ipv4RoutingProtocol> proto = nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol();
     Ptr <dvhop::RoutingProtocol> dvhop = DynamicCast<dvhop::RoutingProtocol>(proto);
 
+    if(dvhop->IsBeacon()) {
+      totalBeacons += 1;
+    }
+
     if(dvhop->IsAlive()) {
       totalNodesAlive += 1;
     }
-    if(dvhop->IsBeacon()) {
-      totalBeacons += 1;
-      continue; // Dont calculate beacon error
+
+    if(!dvhop->IsAlive() || dvhop->IsBeacon()){
+      continue;  // Don't calculate with dead noes and beacons
     }
 
     if(dvhop->GetXPosition() == -1 && dvhop->GetYPosition() == -1) { //position not calculated by trilateration
@@ -232,14 +239,17 @@ DVHopExample::Report () const
     double dy = dvhop->GetYPosition() - mob->GetPosition().y;
     double LE = pow(pow(dx,2) + pow(dy,2), 0.5);
 
-//    std::cout << "Localization Error LE for Node " << i << " = " << LE << std::endl;
-
     totalLE += LE;
   }
   double averageLE = totalLE / totalTrilateration;
   std::cout << "Average Localization Error LE of " << totalTrilateration << "/" << (size-totalBeacons) << " = "<<averageLE << std::endl;
   std::cout << "Nodes Alive: " << totalNodesAlive << "/" << size << std::endl;
-  Simulator::Schedule(Seconds(DEFAULT_REPORT_INTERVAL), &DVHopExample::Report, this);
+
+  // Add to report file
+  //              Time        Count-Alive       Count-Trilateration       Avg-LE
+  *stream->GetStream ()<<Simulator::Now().GetSeconds() << ",\t" <<totalNodesAlive << ",\t"<<totalTrilateration << ",\t" <<averageLE << std::endl;
+
+  Simulator::Schedule(Seconds(DEFAULT_REPORT_INTERVAL), &DVHopExample::Report, this, stream);
 }
 
 void
@@ -324,7 +334,7 @@ DVHopExample::CreateDevices ()
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   wifiChannel.SetPropagationDelay("ns3::ConstantSpeedPropagationDelayModel");
-  wifiChannel.AddPropagationLoss("ns3::RangePropagationLossModel","MaxRange", DoubleValue (25.0));
+  wifiChannel.AddPropagationLoss("ns3::RangePropagationLossModel","MaxRange", DoubleValue (15.0));
   wifiPhy.SetChannel (wifiChannel.Create ());
   WifiHelper wifi = WifiHelper();
   wifi.SetStandard(WIFI_PHY_STANDARD_80211a);
