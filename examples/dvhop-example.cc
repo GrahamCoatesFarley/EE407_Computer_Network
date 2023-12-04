@@ -200,7 +200,8 @@ DVHopExample::Run (bool crit)
 void
 DVHopExample::Report () const
 {
-  std::cout<< "Report at Time: " << Simulator::Now()<< std::endl;
+  std::cout<< "--------------------------------------------------------------" << std::endl;
+  std::cout<< "Report at Time: " << Simulator::Now().GetSeconds()<< std::endl;
   // Go through all non anchor nodes and calculate the localization error
   double totalLE = 0;
   u_int32_t totalBeacons = 0;
@@ -231,7 +232,7 @@ DVHopExample::Report () const
     double dy = dvhop->GetYPosition() - mob->GetPosition().y;
     double LE = pow(pow(dx,2) + pow(dy,2), 0.5);
 
-    std::cout << "Localization Error LE for Node " << i << " = " << LE << std::endl;
+//    std::cout << "Localization Error LE for Node " << i << " = " << LE << std::endl;
 
     totalLE += LE;
   }

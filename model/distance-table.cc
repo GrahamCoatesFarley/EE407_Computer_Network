@@ -120,7 +120,7 @@ namespace ns3
     {
       std::pair<float,float>  pos = h.GetPosition ();
       //	Hops    HopSize			X		     Y		Record Timestamp
-      os << h.GetHops () << "\t"<< h.GetHopSize () << "\t(" << pos.first << ","<< pos.second << ")\t"<< h.GetTime ()<<"\n";
+      os << h.GetHops () << "\t"<< h.GetHopSize () << "\t(" << pos.first << ","<< pos.second << ")\t"<< h.GetTime ().GetSeconds()<<"s\n";
       return os;
     }
 

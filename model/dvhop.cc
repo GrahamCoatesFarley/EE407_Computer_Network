@@ -674,9 +674,6 @@ namespace ns3 {
         if(m_disTable.GetHopSizeOf(*addr) < 0) {
           continue; // Ignore Beacon with no valid hop size
         }
-        if(m_disTable.GetHopsTo(*addr) > 2) {
-          continue; // dont select beacons with more than 2 hops
-        }
         points[counter] = {beaconPos.first, beaconPos.second};
         distances[counter] = m_disTable.GetHopSizeOf(*addr) * m_disTable.GetHopsTo(*addr);
 
@@ -710,6 +707,12 @@ namespace ns3 {
 
       m_xPosition = (ez * fy - ey * fz) / denominator;
       m_yPosition = (ex * fz - ez * fx) / denominator;
+
+      // Bounding the position to the simulation area 100 x 100
+      if(m_xPosition < 0) m_xPosition = 0;
+      else if(m_xPosition > 100) m_xPosition = 100;
+      if(m_yPosition < 0) m_yPosition = 0;
+      else if(m_yPosition > 100) m_yPosition = 100;
     }
 
     Data
