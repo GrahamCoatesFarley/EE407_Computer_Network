@@ -409,12 +409,14 @@ namespace ns3 {
     {
       NS_LOG_DEBUG ("HelloTimer expired");
 
+        // Determine if the protocl has has critical conditions enabled
        if(m_isCrit)
       {
-        if(m_isAlive)
+        if(m_isAlive) // IF the current Node is flagged as alive
         {
           SendHello (); 
           
+          // Determine if the node survives after sending the hello
           double currTime = (Simulator::Now()).GetSeconds();
           u_int32_t chance = (rand()%100) + 1;
           //std::cout << std::endl<< chance << std::endl<< std::endl;   //<-- Output was used to allow for testing of death chance
@@ -431,6 +433,7 @@ namespace ns3 {
           }
           else
           {
+            // Ensure the next time gets scheduled
             m_htimer.Cancel ();
             m_htimer.Schedule (RoutingProtocol::HelloInterval);
           }
@@ -441,6 +444,7 @@ namespace ns3 {
       }
       else
       {
+        // Send Hello without critical conditions
         SendHello ();
         m_htimer.Cancel ();
         m_htimer.Schedule (RoutingProtocol::HelloInterval);
@@ -546,6 +550,7 @@ namespace ns3 {
     void
     RoutingProtocol::RecvDvhop (Ptr<Socket> socket)
     {
+      // Determine if critical condition, if true, a dead node cannot recieve packets
       if(m_isCrit)
       {
         if(m_isAlive)
@@ -651,7 +656,8 @@ namespace ns3 {
 
       std::vector<Ipv4Address> knownBeacons = m_disTable.GetKnownBeacons ();
       std::vector<Ipv4Address>::const_iterator addr;
-      for (addr = knownBeacons.begin (); addr != knownBeacons.end (); ++addr) {
+      for (addr = knownBeacons.begin (); addr != knownBeacons.end (); ++addr) 
+      {
         Position beaconPos = m_disTable.GetBeaconPosition(*addr);
         if(m_disTable.GetHopSizeOf(*addr) < 0) {
           continue; // Ignore Beacon with no valid hop size
@@ -665,7 +671,9 @@ namespace ns3 {
         if(counter==3) break;
       }
 
-      if(counter<3) { // We did not get upto 3 beacons to trilaterate
+      if(counter<3) 
+      { 
+        // We did not get upto 3 beacons to trilaterate
 //        *os->GetStream () << "No enough points for trilateration!" << std::endl;
         return;
       }
